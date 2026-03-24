@@ -90,9 +90,4 @@ class ProjectTest {
         board -= oldCard
         assertThat(board.completionPercentage).isEqualTo(100)
     }
-
-    @Test
-    fun `태스크를 옮기면 완료 개수가 변경된다`() {
-
-    }
 }
