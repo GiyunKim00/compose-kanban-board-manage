@@ -22,7 +22,17 @@ class ProjectTest {
 
     @Test
     fun `프로젝트 내 보드 간 전환이 가능하다`() {
+        val boardTitles = listOf("abcd", "efgh")
+        val oldBoard: Board = Board(boardTitle = boardTitles[0])
+        val newBoard: Board = Board(boardTitle = boardTitles[1])
 
+        var project: Project = Project(
+            boardList = listOf(oldBoard, newBoard),
+            selectedBoardIndex = 0,
+        )
+
+        project = project.switchBoard(1)
+        assertThat(project.selectedBoard.title).isEqualTo(boardTitles[1])
     }
 
     @Test

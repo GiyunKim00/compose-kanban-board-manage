@@ -9,4 +9,9 @@ class Project(
     val boards: List<Board> = boardList
     val selectedBoard: Board = boardList[selectedBoardIndex]
 
+    fun switchBoard(newBoardIndex: Int): Project = Project(
+        boardList = boardList,
+        selectedBoardIndex = newBoardIndex
+    )
+
 }
