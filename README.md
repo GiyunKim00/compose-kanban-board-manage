@@ -1,40 +1,47 @@
-This is a Kotlin Multiplatform project targeting Android, Desktop (JVM).
+# 🚀 1단계 - 칸반 보드 관리(프로젝트)
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+## 과제 진행 요구 사항
 
-### Build and Run Android Application
+- 기능을 구현하기 전 README.md에 구현할 기능 목록을 정리해 추가한다.
+- Git의 커밋 단위는 앞 단계에서 README.md에 정리한 기능 목록 단위로 추가한다.
+- AngularJS Git Commit Message Conventions을 참고해 커밋 메시지를 작성한다.
+- 프로젝트 생성을 위한 뷰는 없다. 가짜 데이터와 테스트 더블을 활용한다.
+- 여러 번 그려지지 않아도 되는 뷰는 매번 리컴포지션 되지 않아야 한다.
+- 모든 요구 사항이 테스트 가능하진 않다. 스스로 판단해서 구분한다.
 
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
+## 기능 요구 사항
 
-### Build and Run Desktop (JVM) Application
+### UI
 
-To build and run the development version of the desktop app, use the run configuration from the run widget
-in your IDE’s toolbar or run it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:run
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:run
-  ```
+- [ ] 기존 칸반보드 좌측에 프로젝트 탭을 신설한다.
+- [ ] 프로젝트 탭 내 보드 목록을 표시한다.
+    - [ ] 보드명이 길 경우 말줄임표로 표현한다.
+    - [ ] 보드를 선택하면, 해당 보드로 화면이 변경된다.
+- [ ] 태스크를 옮겼을 때 스낵바가 표시된다.
+- [ ] 태스크 드래그 앤 드랍 시 목표한 'BoardCardColumn'에 이동된다.
+- [ ] Board의 하드코딩 된 title을 제거한다.
 
----
+### Domain
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+- [ ] 칸반보드 프로젝트 도메인 로직을 생성한다.
+    - [ ] 보드 화면 전환 기능을 작성한다.
+- [ ] 기존 Board 도메인 로직에 태스크 상태 수정 기능을 추가 구현한다.
+- [ ] 기존 Board 도메인 로직에 title을 추가한다.
+
+## 테스트
+
+### UI
+
+- [ ] 보드 간 전환 후 해당 보드의 태스크가 표시된다.
+- [ ] 태스크를 옮기면 스낵바가 표출된다.
+- [ ] 태스크 드래그 앤 드랍 시 목표한 'BoardCardColumn'에 이동된다.
+    - [ ] 태스크를 옮기면 갱신된 태스크 상태 및 통계값이 표시된다.
+
+### Domain
+
+- [ ] 프로젝트가 1개 이상의 보드를 가진다.
+- [ ] 프로젝트 내 보드 간 전환이 가능하다.
+- [ ] 태스크를 옮기면 태스크 상태 및 통계값이 갱신된다.
+    - [ ] 태스크 상태가 변경된다.
+    - [ ] 태스크 완료율이 변경된다.
+    - [ ] Progress bar가 변경된다.
