@@ -5,8 +5,10 @@ import woowacourse.kanban.domain.card.CardTaskState
 
 class Board(
     private val cardList: List<Card> = emptyList(),
-) {
+    private val boardTitle: String = "",
+    ) {
     val cards: List<Card> = cardList
+    val title: String = boardTitle
     val totalTaskCount: Int = cardList.size
     val doneTaskCount: Int = cardList.count { it.taskState == CardTaskState.DONE }
     val inProgressTaskCount: Int = cardList.count { it.taskState == CardTaskState.IN_PROGRESS }
@@ -16,5 +18,6 @@ class Board(
     val completionPercentage = (completionRatio * 100).toInt()
 
     fun cardsByState(state: CardTaskState): List<Card> = cards.filter { it.taskState == state  }
-    operator fun plus(card: Card): Board = Board(cardList + card)
+    operator fun plus(card: Card): Board = Board(cardList = cardList + card)
+    operator fun minus(card: Card): Board = Board(cardList = cardList - card)
 }
