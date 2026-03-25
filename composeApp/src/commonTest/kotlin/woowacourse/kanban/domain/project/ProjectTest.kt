@@ -19,6 +19,8 @@ class ProjectTest {
         val project: Project = Project(
             boardList = listOf(board),
             selectedBoardIndex = 0,
+            projectTitle = "프로젝트 제목",
+            projectDescription = "프로젝트 설명"
         )
 
         assertThat(project.selectedBoard.title).isEqualTo(boardTitle)
@@ -33,6 +35,8 @@ class ProjectTest {
         var project: Project = Project(
             boardList = listOf(oldBoard, newBoard),
             selectedBoardIndex = 0,
+            projectTitle = "프로젝트 제목",
+            projectDescription = "프로젝트 설명"
         )
 
         project = project.switchBoard(1)
