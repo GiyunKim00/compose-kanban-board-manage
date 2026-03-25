@@ -122,6 +122,9 @@ fun BoardScreen(
                     board = board,
                     onChangeContent = {
                         onBoardChange(it)
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar("태스크가 이동되었습니다.")
+                        }
                     },
                 )
             }
