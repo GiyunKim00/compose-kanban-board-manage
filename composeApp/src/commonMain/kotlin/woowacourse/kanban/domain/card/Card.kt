@@ -1,11 +1,15 @@
 package woowacourse.kanban.domain.card
 
+import woowacourse.kanban.domain.card.Card.Companion.create
+import java.util.UUID
+
 /**
  * Card 도메인 모델입니다.
  * 카드 생성 규칙을 적용합니다.
  * 생성은 [create] 팩토리 메서드로 수행합니다.
  */
 class Card private constructor(
+    val id: String,
     val title: String,
     val content: String,
     val tags: List<String>,
@@ -75,6 +79,7 @@ class Card private constructor(
             require(normalizedTags.all { it.length <= MAX_TAG_LENGTH }) { "[Card] 태그는 최대 ${MAX_TAG_LENGTH}자까지 가능합니다." }
 
             return Card(
+                id = UUID.randomUUID().toString(),
                 title = title,
                 content = content,
                 tags = normalizedTags,
@@ -82,6 +87,19 @@ class Card private constructor(
                 taskState = state,
             )
         }
+    }
+
+    fun updateWithNewState(
+        newState: CardTaskState,
+    ): Card {
+        return Card(
+            id = id,
+            title = title,
+            content = content,
+            tags = tags,
+            managerState = managerState,
+            taskState = newState,
+        )
     }
 
     /**

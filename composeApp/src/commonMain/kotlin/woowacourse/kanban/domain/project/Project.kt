@@ -1,13 +1,12 @@
 package woowacourse.kanban.domain.project
 
-import com.sun.beans.introspect.PropertyInfo
 import woowacourse.kanban.domain.board.Board
 
 class Project(
     private val boardList: List<Board> = emptyList(),
-    private val selectedBoardIndex: Int,
-    private val projectTitle: String,
-    private val projectDescription: String,
+    private val selectedBoardIndex: Int = 0,
+    private val projectTitle: String = "",
+    private val projectDescription: String ="",
 ) {
 
     val getTitle = projectTitle
@@ -22,4 +21,10 @@ class Project(
         projectDescription = projectDescription,
     )
 
+    fun updateBoard(newBoard: Board): Project = Project(
+        boardList = boardList.map { if (it.title == newBoard.title) newBoard else it },
+        selectedBoardIndex = selectedBoardIndex,
+        projectTitle = projectTitle,
+        projectDescription = projectDescription,
+    )
 }

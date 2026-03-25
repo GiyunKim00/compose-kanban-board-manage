@@ -27,7 +27,9 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -35,7 +37,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,16 +65,20 @@ import woowacourse.kanban.ui.card.CardCreationScreen
 import woowacourse.kanban.ui.card.CardScreen
 
 @Composable
-fun BoardScreen() {
-    var board by remember { mutableStateOf(Board()) }
+fun BoardScreen(
+    board: Board,
+    onAddCard: (Card) -> Unit,
+    onBoardChange: (Board) -> Unit,
+) {
     var showCardCreationPanel by remember { mutableStateOf(false) }
 
     BoardScreen(
         board = board,
         showCardCreationPanel = showCardCreationPanel,
-        onAddCard = { newCard -> board += newCard },
+        onAddCard = onAddCard,
         onShowCardCreationPanelChange = { showCardCreationPanel = it },
         modifier = Modifier.fillMaxSize(),
+        onBoardChange = onBoardChange,
     )
 }
 
@@ -80,6 +90,7 @@ fun BoardScreen(
     onAddCard: (Card) -> Unit,
     onShowCardCreationPanelChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    onBoardChange: (Board) -> Unit = {},
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
@@ -109,6 +120,9 @@ fun BoardScreen(
                 BoardContents(
                     modifier = Modifier.fillMaxSize(),
                     board = board,
+                    onChangeContent = {
+                        onBoardChange(it)
+                    },
                 )
             }
 
@@ -225,19 +239,52 @@ private fun BoardHeaderSection(
 private fun BoardContents(
     modifier: Modifier = Modifier,
     board: Board,
+    onChangeContent: (Board) -> Unit = {},
 ) {
+    var draggedTask by remember { mutableStateOf<Card?>(null) }
+    var currentDragPosition by remember { mutableStateOf<Offset?>(null) }
+    val columnBounds = remember { mutableStateMapOf<CardTaskState, Rect>() }
+
     Row(
         modifier = modifier
             .background(Color(0xFFF9FAFB))
             .padding(24.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+
+        fun taskEnd() {
+            val dropPosition = currentDragPosition
+            val targetStatus = columnBounds.entries
+                .firstOrNull { (_, rect) -> dropPosition?.let { rect.contains(it) } == true }?.key
+
+            draggedTask?.let { task ->
+                if (targetStatus != null && task.taskState != targetStatus) {
+                    onChangeContent(board.moveCard(task.id, targetStatus))
+                }
+            }
+            currentDragPosition = null
+            draggedTask = null
+        }
+
+        fun taskDragCancel() {
+            currentDragPosition = null
+            draggedTask = null
+        }
+
         BoardCardColumn(
             modifier = Modifier
                 .width(320.dp)
                 .height(748.dp),
             filteredCards = board.cardsByState(CardTaskState.TODO),
             mode = CardTaskState.TODO,
+            getIsDropTarget = {
+                currentDragPosition?.let { columnBounds[CardTaskState.TODO]?.contains(it) } ?: false
+            },
+            onBoundsChanged = { rect -> columnBounds[CardTaskState.TODO] = rect },
+            onTaskDragStart = { task -> draggedTask = task },
+            onTaskDragChange = { pos -> currentDragPosition = pos },
+            onTaskDragEnd = ::taskEnd,
+            onTaskDragCancel = ::taskDragCancel,
         )
         BoardCardColumn(
             modifier = Modifier
@@ -245,6 +292,14 @@ private fun BoardContents(
                 .height(748.dp),
             filteredCards = board.cardsByState(CardTaskState.IN_PROGRESS),
             mode = CardTaskState.IN_PROGRESS,
+            getIsDropTarget = {
+                currentDragPosition?.let { columnBounds[CardTaskState.IN_PROGRESS]?.contains(it) } ?: false
+            },
+            onBoundsChanged = { rect -> columnBounds[CardTaskState.IN_PROGRESS] = rect },
+            onTaskDragStart = { task -> draggedTask = task },
+            onTaskDragChange = { pos -> currentDragPosition = pos },
+            onTaskDragEnd = ::taskEnd,
+            onTaskDragCancel = ::taskDragCancel,
         )
         BoardCardColumn(
             modifier = Modifier
@@ -252,6 +307,14 @@ private fun BoardContents(
                 .height(748.dp),
             filteredCards = board.cardsByState(CardTaskState.DONE),
             mode = CardTaskState.DONE,
+            getIsDropTarget = {
+                currentDragPosition?.let { columnBounds[CardTaskState.DONE]?.contains(it) } ?: false
+            },
+            onBoundsChanged = { rect -> columnBounds[CardTaskState.DONE] = rect },
+            onTaskDragStart = { task -> draggedTask = task },
+            onTaskDragChange = { pos -> currentDragPosition = pos },
+            onTaskDragEnd = ::taskEnd,
+            onTaskDragCancel = ::taskDragCancel,
         )
     }
 }
@@ -261,7 +324,16 @@ private fun BoardCardColumn(
     modifier: Modifier = Modifier,
     filteredCards: List<Card>,
     mode: CardTaskState,
-) {
+    getIsDropTarget: () -> Boolean = { false },
+    onBoundsChanged: (Rect) -> Unit = {},
+    onTaskDragStart: (Card) -> Unit = {},
+    onTaskDragChange: (Offset) -> Unit = {},
+    onTaskDragEnd: () -> Unit = {},
+    onTaskDragCancel: () -> Unit = {},
+
+    ) {
+    val isDropTarget by remember { derivedStateOf { getIsDropTarget() } }
+    val lastBoundsHolder = remember { mutableStateOf<Rect?>(null) }
     val headerColor = when (mode) {
         CardTaskState.TODO -> TodoHeaderColor
         CardTaskState.IN_PROGRESS -> InProgressHeaderColor
@@ -275,8 +347,19 @@ private fun BoardCardColumn(
 
     Column(
         modifier = modifier
+            .testTag(mode.name)
             .border(1.dp, headerColor, RoundedCornerShape(16.dp))
-            .clip(RoundedCornerShape(16.dp)),
+            .clip(RoundedCornerShape(16.dp))
+            .onGloballyPositioned {
+                val newBounds = it.boundsInWindow()
+                if (newBounds != lastBoundsHolder.value) {
+                    lastBoundsHolder.value = newBounds
+                    onBoundsChanged(newBounds)
+                }
+            }
+            .then(
+                if (isDropTarget) modifier.border(2.dp, headerColor, RoundedCornerShape(12.dp)) else modifier,
+            ),
     ) {
         Row(
             modifier = Modifier
@@ -314,8 +397,17 @@ private fun BoardCardColumn(
                 .padding(horizontal = 17.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            items(filteredCards) { card ->
-                CardScreen(cardData = card)
+            items(
+                items = filteredCards,
+                key = { card -> card.id },
+            ) { card ->
+                CardScreen(
+                    cardData = card,
+                    onDragStart = { onTaskDragStart(card) },
+                    onDragChange = onTaskDragChange,
+                    onDragEnd = onTaskDragEnd,
+                    onDragCancel = onTaskDragCancel,
+                )
             }
         }
     }
