@@ -8,6 +8,7 @@ import java.util.UUID
  * Board Class입니다.
  * @param cardList 카드 리스트입니다.
  * @param boardTitle 보드 제목입니다.
+ * @param id 보드 ID입니다.
  */
 class Board(
     private val cardList: List<Card> = emptyList(),
