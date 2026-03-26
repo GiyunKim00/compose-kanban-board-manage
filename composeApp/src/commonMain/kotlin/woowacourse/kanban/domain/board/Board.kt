@@ -29,10 +29,12 @@ class Board(
 
     fun cardsByState(state: CardTaskState): List<Card> = cards.filter { it.taskState == state  }
     operator fun plus(card: Card): Board = Board(
+        id = id,
         boardTitle = boardTitle,
         cardList = cardList + card
     )
     operator fun minus(card: Card): Board = Board(
+        id = id,
         boardTitle = boardTitle,
         cardList = cardList - card
     )
@@ -43,6 +45,7 @@ class Board(
      */
     fun moveCard(cardId: String, targetState: CardTaskState): Board {
         return Board(
+            id = id,
             boardTitle = boardTitle,
             cardList = cardList.map { card ->
                 if (card.id == cardId) card.updateWithNewState(targetState) else card
