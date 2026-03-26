@@ -22,11 +22,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import woowacourse.kanban.board.ui.theme.BoardColor.ProjectTabHeaderColor
-import woowacourse.kanban.board.ui.theme.KanbanCardColor.DefaultBackground
+import woowacourse.kanban.ui.theme.BoardColor.ProjectTabHeaderColor
+import woowacourse.kanban.ui.theme.KanbanCardColor.DefaultBackground
 import woowacourse.kanban.domain.board.Board
 import woowacourse.kanban.domain.project.Project
 
+/**
+ * 프로젝트 탭입니다. 프로젝트 제목, 설명, 보드 목록을 보여줍니다.
+ * @param modifier Modifier
+ * @param project 프로젝트 데이터입니다.
+ * @param onBoardSelected 보드를 선택합니다.
+ */
 @Composable
 fun ProjectTab(
     project: Project,
@@ -57,6 +63,12 @@ fun ProjectTab(
     }
 }
 
+/**
+ * 프로젝트 탭 헤더 영역입니다. 프로젝트 제목과 설명을 보여줍니다.
+ * @param modifier Modifier
+ * @param title 프로젝트 제목입니다.
+ * @param description 프로젝트 설명입니다.
+ */
 @Composable
 private fun ProjectTabHeader(
     title: String,
@@ -93,6 +105,12 @@ private fun ProjectTabHeader(
     }
 }
 
+/**
+ * 프로젝트 탭 컨텐츠 영역입니다. 프로젝트에 포함된 보드 목록을 보여줍니다.
+ * @param boards 보드 리스트입니다.
+ * @param modifier Modifier
+ * @param onBoardSelected 보드를 선택합니다.
+ */
 @Composable
 private fun ProjectContents(
     boards: List<Board>,
