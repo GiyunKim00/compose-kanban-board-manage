@@ -2,13 +2,22 @@ package woowacourse.kanban.domain.board
 
 import woowacourse.kanban.domain.card.Card
 import woowacourse.kanban.domain.card.CardTaskState
+import java.util.UUID
 
+/**
+ * Board Class입니다.
+ * @param cardList 카드 리스트입니다.
+ * @param boardTitle 보드 제목입니다.
+ */
 class Board(
     private val cardList: List<Card> = emptyList(),
     private val boardTitle: String = "",
+    private val id: String = UUID.randomUUID().toString(),
+
     ) {
     var cards: List<Card> = cardList
     val title: String = boardTitle
+    val boardId: String = id
     val totalTaskCount: Int = cardList.size
     val doneTaskCount: Int = cardList.count { it.taskState == CardTaskState.DONE }
     val inProgressTaskCount: Int = cardList.count { it.taskState == CardTaskState.IN_PROGRESS }
@@ -26,6 +35,11 @@ class Board(
         boardTitle = boardTitle,
         cardList = cardList - card
     )
+
+    /**
+     * Card의 상태를 변경합니다. Card Class의 updateWithNewState 메서드를 활용합니다.
+     * @param cardId 변경할 카드의 ID입니다.
+     */
     fun moveCard(cardId: String, targetState: CardTaskState): Board {
         return Board(
             boardTitle = boardTitle,
