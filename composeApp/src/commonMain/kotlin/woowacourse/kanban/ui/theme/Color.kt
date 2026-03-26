@@ -1,7 +1,6 @@
-package woowacourse.kanban.board.ui.theme
+package woowacourse.kanban.ui.theme
 
 import androidx.compose.ui.graphics.Color
-import woowacourse.kanban.domain.project.Project
 
 object KanbanCardColor {
     val SelectedBackground = Color(0xFFE5E7EB)
