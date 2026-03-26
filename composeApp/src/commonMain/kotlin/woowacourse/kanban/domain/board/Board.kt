@@ -14,9 +14,7 @@ class Board(
     private val cardList: List<Card> = emptyList(),
     private val boardTitle: String = "",
     private val id: String = UUID.randomUUID().toString(),
-
-    ) {
-    var cards: List<Card> = cardList
+) {
     val title: String = boardTitle
     val boardId: String = id
     val totalTaskCount: Int = cardList.size
@@ -27,7 +25,7 @@ class Board(
     else doneTaskCount.toFloat() / totalTaskCount
     val completionPercentage = (completionRatio * 100).toInt()
 
-    fun cardsByState(state: CardTaskState): List<Card> = cards.filter { it.taskState == state  }
+    fun cardsByState(state: CardTaskState): List<Card> = cardList.filter { it.taskState == state }
     operator fun plus(card: Card): Board = Board(
         id = id,
         boardTitle = boardTitle,
