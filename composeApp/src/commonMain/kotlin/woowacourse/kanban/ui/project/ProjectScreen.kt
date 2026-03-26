@@ -38,6 +38,14 @@ fun ProjectScreen() {
     )
 }
 
+/**
+ * 프로젝트 화면입니다. 프로젝트 탭과 보드 영역을 포함합니다.
+ * @param modifier Modifier
+ * @param project 프로젝트 데이터입니다.
+ * @param onBoardSelected 보드를 선택합니다.
+ * @param onAddNewCard 보드에 카드를 추가합니다.
+ * @param onBoardChange 보드 데이터를 변경합니다.
+ */
 @Composable
 fun ProjectScreen(
     modifier: Modifier = Modifier,
