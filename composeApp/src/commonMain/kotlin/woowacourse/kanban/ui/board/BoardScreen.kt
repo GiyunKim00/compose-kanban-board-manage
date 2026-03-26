@@ -392,7 +392,7 @@ private fun BoardCardColumn(
                 }
             }
             .then(
-                if (isDropTarget) modifier.border(2.dp, headerColor, RoundedCornerShape(12.dp)) else modifier,
+                if (isDropTarget) Modifier.border(2.dp, headerColor, RoundedCornerShape(12.dp)) else modifier,
             ),
     ) {
         Row(
@@ -426,7 +426,7 @@ private fun BoardCardColumn(
             )
         }
         LazyColumn(
-            modifier = modifier
+            modifier = Modifier
                 .background(contentColor)
                 .padding(horizontal = 17.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
