@@ -18,6 +18,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * 프로젝트 탭 버튼입니다. 프로젝트에 포함된 보드를 선택하는 버튼입니다.
+ * @param tabTitle 탭 제목입니다.
+ * @param onClick 탭을 클릭했을 때의 동작입니다.
+ * @param modifier Modifier
+ * @param isSelected 선택 여부입니다.
+ */
 @Composable
 fun ProjectTabButton(
     tabTitle: String,
