@@ -18,7 +18,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import woowacourse.kanban.board.ui.theme.KanbanCardColor.DefaultContent
+import woowacourse.kanban.ui.theme.KanbanCardColor.DefaultContent
 
 @Composable
 fun CardCreationPanelFormSection(

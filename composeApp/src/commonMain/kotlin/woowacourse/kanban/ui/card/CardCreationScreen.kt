@@ -36,10 +36,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import woowacourse.kanban.board.ui.theme.KanbanCardColor.DefaultBackground
-import woowacourse.kanban.board.ui.theme.KanbanCardColor.DefaultContent
-import woowacourse.kanban.board.ui.theme.KanbanCardColor.SelectedBackground
-import woowacourse.kanban.board.ui.theme.KanbanCardColor.SelectedContent
+import woowacourse.kanban.ui.theme.KanbanCardColor.DefaultBackground
+import woowacourse.kanban.ui.theme.KanbanCardColor.DefaultContent
+import woowacourse.kanban.ui.theme.KanbanCardColor.SelectedBackground
+import woowacourse.kanban.ui.theme.KanbanCardColor.SelectedContent
 import woowacourse.kanban.domain.board.CardFormState
 import woowacourse.kanban.domain.card.Card
 import woowacourse.kanban.domain.card.CardManagerState
