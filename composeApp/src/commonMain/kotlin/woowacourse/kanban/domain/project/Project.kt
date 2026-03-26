@@ -12,6 +12,7 @@ class Project(
     val getTitle = projectTitle
     val getDescription = projectDescription
     val boards: List<Board> = boardList
+    val currentBoardIndex: Int = selectedBoardIndex
     val selectedBoard: Board = boardList[selectedBoardIndex]
 
     /**

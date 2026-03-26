@@ -12,20 +12,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import woowacourse.kanban.ui.theme.BoardColor.ProjectTabHeaderColor
-import woowacourse.kanban.ui.theme.KanbanCardColor.DefaultBackground
 import woowacourse.kanban.domain.board.Board
 import woowacourse.kanban.domain.project.Project
+import woowacourse.kanban.ui.theme.BoardColor.ProjectTabHeaderColor
+import woowacourse.kanban.ui.theme.KanbanCardColor.DefaultBackground
 
 /**
  * 프로젝트 탭입니다. 프로젝트 제목, 설명, 보드 목록을 보여줍니다.
@@ -57,6 +53,7 @@ fun ProjectTab(
         )
         ProjectContents(
             modifier = Modifier.fillMaxWidth(),
+            selectedBoardIndex = project.currentBoardIndex,
             onBoardSelected = onBoardSelected,
             boards = project.boards,
         )
@@ -109,15 +106,16 @@ private fun ProjectTabHeader(
  * 프로젝트 탭 컨텐츠 영역입니다. 프로젝트에 포함된 보드 목록을 보여줍니다.
  * @param boards 보드 리스트입니다.
  * @param modifier Modifier
+ * @param selectedBoardIndex 선택된 보드의 인덱스입니다.
  * @param onBoardSelected 보드를 선택합니다.
  */
 @Composable
 private fun ProjectContents(
     boards: List<Board>,
     modifier: Modifier = Modifier,
+    selectedBoardIndex: Int = 0,
     onBoardSelected: (Int) -> Unit = {},
 ) {
-    var selectedIndex by remember { mutableIntStateOf(0) }
 
     Column(
         modifier = modifier
@@ -128,11 +126,8 @@ private fun ProjectContents(
         boards.forEachIndexed { index, board ->
             ProjectTabButton(
                 tabTitle = board.title,
-                onClick = {
-                    selectedIndex = index
-                    onBoardSelected(index)
-                },
-                isSelected = index == selectedIndex,
+                onClick = { onBoardSelected(index) },
+                isSelected = index == selectedBoardIndex,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
