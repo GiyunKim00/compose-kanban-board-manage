@@ -50,12 +50,12 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
-import woowacourse.kanban.board.ui.theme.BoardColor.DoneContentColor
-import woowacourse.kanban.board.ui.theme.BoardColor.DoneHeaderColor
-import woowacourse.kanban.board.ui.theme.BoardColor.InProgressContentColor
-import woowacourse.kanban.board.ui.theme.BoardColor.InProgressHeaderColor
-import woowacourse.kanban.board.ui.theme.BoardColor.TodoContentColor
-import woowacourse.kanban.board.ui.theme.BoardColor.TodoHeaderColor
+import woowacourse.kanban.ui.theme.BoardColor.DoneContentColor
+import woowacourse.kanban.ui.theme.BoardColor.DoneHeaderColor
+import woowacourse.kanban.ui.theme.BoardColor.InProgressContentColor
+import woowacourse.kanban.ui.theme.BoardColor.InProgressHeaderColor
+import woowacourse.kanban.ui.theme.BoardColor.TodoContentColor
+import woowacourse.kanban.ui.theme.BoardColor.TodoHeaderColor
 import woowacourse.kanban.domain.board.Board
 import woowacourse.kanban.domain.card.Card
 import woowacourse.kanban.domain.card.CardManagerState
@@ -82,7 +82,15 @@ fun BoardScreen(
     )
 }
 
-
+/**
+ * 보드 화면입니다. 프로젝트 화면의 우측 보드 영역입니다.
+ * @param board 보드 데이터입니다.
+ * @param showCardCreationPanel 카드 생성 모달을 보여줄지 여부입니다.
+ * @param onAddCard 보드에 카드를 추가합니다.
+ * @param onShowCardCreationPanelChange 카드 생성창 표시 여부입니다.
+ * @param modifier Modifier
+ * @param onBoardChange 보드 데이터를 변경합니다.
+ */
 @Composable
 fun BoardScreen(
     board: Board,
@@ -150,6 +158,12 @@ fun BoardScreen(
     }
 }
 
+/**
+ * 보드 헤더 영역입니다. Board 제목, 진행율, 프로그레스 바가 포함됩니다.
+ * @param board 보드 데이터입니다.
+ * @param onClick 보드 생성 버튼 클릭 이벤트입니다.
+ * @param modifier Modifier
+ */
 @Composable
 private fun BoardHeaderSection(
     board: Board,
@@ -233,11 +247,16 @@ private fun BoardHeaderSection(
             color = Color(0xFF4F39F6),
             trackColor = ProgressIndicatorDefaults.linearTrackColor,
             strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
-
-            )
+        )
     }
 }
 
+/**
+ * 보드 컨텐츠 영역입니다. 태스크 작업 상태에 따른 카드 리스트를 표시합니다.
+ * @param modifier Modifier
+ * @param board 보드 데이터입니다.
+ * @param onChangeContent 보드 데이터를 변경합니다.
+ */
 @Composable
 private fun BoardContents(
     modifier: Modifier = Modifier,
@@ -322,11 +341,23 @@ private fun BoardContents(
     }
 }
 
+/**
+ * 보드 카드 컬럼입니다. 작업 상태에 따른 태스크 리스트 Column입니다.
+ * @param filteredCards 필터링된 카드 리스트입니다.
+ * @param mode 카드 상태입니다.
+ * @param modifier Modifier
+ * @param getIsDropTarget 드래그 타겟 여부를 리턴합니다.
+ * @param onBoundsChanged 드래그 영역을 변경합니다.
+ * @param onTaskDragStart 카드를 드래그 합니다.
+ * @param onTaskDragChange 드래그 위치를 변경합니다.
+ * @param onTaskDragEnd 드래그가 끝났을 때
+ * @param onTaskDragCancel 드래그가 취소되었을 때
+ */
 @Composable
 private fun BoardCardColumn(
-    modifier: Modifier = Modifier,
     filteredCards: List<Card>,
     mode: CardTaskState,
+    modifier: Modifier = Modifier,
     getIsDropTarget: () -> Boolean = { false },
     onBoundsChanged: (Rect) -> Unit = {},
     onTaskDragStart: (Card) -> Unit = {},
