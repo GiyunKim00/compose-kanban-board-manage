@@ -57,7 +57,7 @@
   - [ ] 리팩토링에 따른 UI / Test 로직 수정
 - [x] Board, Project를 data class로 리팩토링
 - [x] CommonTitleText 제거 및 TextStyle 작성
-- [ ] Preview Annotation 수정
+- [x] Preview Annotation 수정
 - [ ] Preview Code 위치 수정
 - [x] CardFormState 관련 피드백 반영
 - [x] ActionButton 관련 피드백 반영
