@@ -19,38 +19,38 @@ class Card private constructor(
     companion object {
         private const val MAX_TAG_COUNT = 5
         private const val MAX_TAG_LENGTH = 5
-        private const val TITLE_INVALID_FORMAT_MSG = "제목을 입력해 주세요."
-        private const val TAG_VALID_FORMAT_MSG = "5자 이내의 태그를 최대 5개까지 등록할 수 있습니다."
-        private const val TAG_INVALID_FORMAT_MSG = "태그 형식이 올바르지 않습니다."
-        private const val TAG_INVALID_RULE_MSG = "태그는 5자 이내로 5개까지만 등록할 수 있습니다."
 
-        fun isValidText(rawText: String): Boolean {
-            return rawText.trim().isNotBlank()
+        fun validateTitle(rawText: String): TitleValidationResult {
+            return if (rawText.trim().isNotBlank()) {
+                TitleValidationResult.Valid
+            } else {
+                TitleValidationResult.Blank
+            }
         }
 
-        fun getTitleInfo(): String {
-            return TITLE_INVALID_FORMAT_MSG
+        fun parseTag(rawText: String): List<String> {
+            if (rawText.isBlank()) return emptyList()
+            return rawText.split(",").map { it.trim() }
         }
 
-        fun parseTag(tempTags: String): List<String> {
-            return tempTags.trim().split(",")
-        }
+        fun validateTag(rawText: String): TagValidationResult {
+            if (rawText.isBlank()) return TagValidationResult.Valid
 
-        fun isValidTag(rawText: String): Boolean {
-            if (rawText.isBlank()) return true
+            val parsedTags = parseTag(rawText)
 
-            val parsedText = parseTag(rawText)
-            return (parsedText.all { isValidText(it) } && parsedText.size <= MAX_TAG_COUNT)
-        }
+            if (parsedTags.any { it.isBlank() }) {
+                return TagValidationResult.InvalidBlankTag
+            }
 
-        fun isValidTagInfo(rawText: String): String {
-            val parsedText = parseTag(rawText)
+            if (parsedTags.size > MAX_TAG_COUNT) {
+                return TagValidationResult.TooManyTags
+            }
 
-            if (isValidText(rawText) && parsedText.any { isValidText(it) == false }) return TAG_INVALID_FORMAT_MSG
+            if (parsedTags.any { it.length > MAX_TAG_LENGTH }) {
+                return TagValidationResult.TooLongTag
+            }
 
-            if (isValidText(rawText) && parsedText.size > MAX_TAG_COUNT) return TAG_INVALID_RULE_MSG
-
-            return TAG_VALID_FORMAT_MSG
+            return TagValidationResult.Valid
         }
 
         /**
@@ -69,14 +69,20 @@ class Card private constructor(
             manager: CardManagerState,
             state: CardTaskState,
         ): Card {
-            require(title.isNotBlank()) { "[Card] 제목은 필수 입력 항목입니다." }
+            require(validateTitle(title) is TitleValidationResult.Valid) {
+                "[Card] 제목은 필수 입력 항목입니다."
+            }
 
             val normalizedTags = tags
                 .map { it.trim() }
                 .filter { it.isNotEmpty() }
 
-            require(normalizedTags.size <= MAX_TAG_COUNT) { "[Card] 태그는 최대 ${MAX_TAG_COUNT}개까지 가능합니다." }
-            require(normalizedTags.all { it.length <= MAX_TAG_LENGTH }) { "[Card] 태그는 최대 ${MAX_TAG_LENGTH}자까지 가능합니다." }
+            require(normalizedTags.size <= MAX_TAG_COUNT) {
+                "[Card] 태그는 최대 ${MAX_TAG_COUNT}개까지 가능합니다."
+            }
+            require(normalizedTags.all { it.length <= MAX_TAG_LENGTH }) {
+                "[Card] 태그는 최대 ${MAX_TAG_LENGTH}자까지 가능합니다."
+            }
 
             return Card(
                 id = UUID.randomUUID().toString(),
