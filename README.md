@@ -55,7 +55,7 @@
   - [ ] BoardScreen
   - [ ] CardScreen
   - [ ] 리팩토링에 따른 UI / Test 로직 수정
-- [ ] Board, Project를 data class로 리팩토링
+- [x] Board, Project를 data class로 리팩토링
 - [ ] CommonTitleText 제거 및 TextStyle 작성
 - [ ] Preview Annotation 수정
 - [ ] Preview Code 위치 수정
