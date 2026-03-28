@@ -50,12 +50,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
-import woowacourse.kanban.ui.theme.BoardColor.DoneContentColor
-import woowacourse.kanban.ui.theme.BoardColor.DoneHeaderColor
-import woowacourse.kanban.ui.theme.BoardColor.InProgressContentColor
-import woowacourse.kanban.ui.theme.BoardColor.InProgressHeaderColor
-import woowacourse.kanban.ui.theme.BoardColor.TodoContentColor
-import woowacourse.kanban.ui.theme.BoardColor.TodoHeaderColor
 import woowacourse.kanban.domain.board.Board
 import woowacourse.kanban.domain.card.Card
 import woowacourse.kanban.domain.card.CardManagerState
@@ -63,22 +57,31 @@ import woowacourse.kanban.domain.card.CardTaskState
 import woowacourse.kanban.ui.board.common.toDisplayText
 import woowacourse.kanban.ui.card.CardCreationScreen
 import woowacourse.kanban.ui.card.CardScreen
+import woowacourse.kanban.ui.theme.BoardColor.DoneContentColor
+import woowacourse.kanban.ui.theme.BoardColor.DoneHeaderColor
+import woowacourse.kanban.ui.theme.BoardColor.InProgressContentColor
+import woowacourse.kanban.ui.theme.BoardColor.InProgressHeaderColor
+import woowacourse.kanban.ui.theme.BoardColor.TodoContentColor
+import woowacourse.kanban.ui.theme.BoardColor.TodoHeaderColor
 
 @Composable
 fun BoardScreen(
     board: Board,
     onAddCard: (Card) -> Unit,
     onBoardChange: (Board) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var showCardCreationPanel by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    BoardScreen(
+    BoardScreenContents(
         board = board,
         showCardCreationPanel = showCardCreationPanel,
-        onAddCard = onAddCard,
         onShowCardCreationPanelChange = { showCardCreationPanel = it },
-        modifier = Modifier.fillMaxSize(),
+        onAddCard = onAddCard,
         onBoardChange = onBoardChange,
+        snackbarHostState = snackbarHostState,
+        modifier = modifier.fillMaxSize(),
     )
 }
 
@@ -92,15 +95,15 @@ fun BoardScreen(
  * @param onBoardChange 보드 데이터를 변경합니다.
  */
 @Composable
-fun BoardScreen(
+internal fun BoardScreenContents(
     board: Board,
     showCardCreationPanel: Boolean,
-    onAddCard: (Card) -> Unit,
     onShowCardCreationPanelChange: (Boolean) -> Unit,
+    onAddCard: (Card) -> Unit,
+    onBoardChange: (Board) -> Unit,
+    snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
-    onBoardChange: (Board) -> Unit = {},
 ) {
-    val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
@@ -175,7 +178,6 @@ private fun BoardHeaderSection(
     val completionRatio = board.completionRatio
     val completionPercentage = board.completionPercentage
 
-
     Column(
         modifier = modifier
             .border(1.dp, Color(0xFFE5E7EB))
@@ -190,7 +192,7 @@ private fun BoardHeaderSection(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text(
-                    text = "Compose Desktop 칸반 보드 ",
+                    text = board.title,
                     fontWeight = FontWeight.W500,
                     fontSize = 24.sp,
                     lineHeight = 32.sp,
@@ -458,12 +460,12 @@ class BoardScreenPreviewProvider : PreviewParameterProvider<BoardScreenPreviewSt
     override val values: Sequence<BoardScreenPreviewState>
         get() = sequenceOf(
             BoardScreenPreviewState(
-                board = Board(emptyList()),
+                board = Board(cards = emptyList()),
                 showCardCreationPanel = false,
             ),
             BoardScreenPreviewState(
                 board = Board(
-                    listOf(
+                    cards = listOf(
                         Card.create(
                             title = "UI 테스트용 1",
                             content = "내용내용내용내용내용내용내용내용내용내용내용내용내용내용내용내용내용내용내용내용내용내용내용내용",
@@ -491,7 +493,7 @@ class BoardScreenPreviewProvider : PreviewParameterProvider<BoardScreenPreviewSt
             ),
             BoardScreenPreviewState(
                 board = Board(
-                    listOf(
+                    cards = listOf(
                         Card.create(
                             title = "UI 테스트용 1",
                             content = "내용내용내용내용내용내용내용내용내용내용내용내용내용내용내용내용내용내용내용내용내용내용내용내용",
@@ -512,7 +514,7 @@ class BoardScreenPreviewProvider : PreviewParameterProvider<BoardScreenPreviewSt
             ),
             BoardScreenPreviewState(
                 board = Board(
-                    listOf(
+                    cards = listOf(
                         Card.create(
                             title = "태스크 생성 모달 테스트",
                             content = "모달이 열린 상태를 확인합니다.",
@@ -538,11 +540,12 @@ private fun BoardScreenPreview(
     @PreviewParameter(BoardScreenPreviewProvider::class)
     state: BoardScreenPreviewState,
 ) {
-    BoardScreen(
+    BoardScreenContents(
         board = state.board,
         showCardCreationPanel = state.showCardCreationPanel,
-        onAddCard = {},
         onShowCardCreationPanelChange = {},
-        modifier = Modifier,
+        onAddCard = {},
+        onBoardChange = {},
+        snackbarHostState = SnackbarHostState(),
     )
 }

@@ -52,7 +52,7 @@
   - [ ] 리팩토링에 따른 UI / Test 로직 수정
 - [ ] State Hoisting 관련 함수 수정
   - [ ] ProjectScreen
-  - [ ] BoardScreen
+  - [x] BoardScreen
   - [x] CardScreen
   - [ ] 리팩토링에 따른 UI / Test 로직 수정
 - [x] Board, Project를 data class로 리팩토링
