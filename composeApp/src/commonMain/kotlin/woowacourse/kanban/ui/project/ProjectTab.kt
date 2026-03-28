@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import woowacourse.kanban.domain.board.Board
@@ -43,8 +44,8 @@ fun ProjectTab(
     ) {
         ProjectTabHeader(
             modifier = Modifier.fillMaxWidth(),
-            title = project.getTitle,
-            description = project.getDescription,
+            title = project.title,
+            description = project.description,
         )
         HorizontalDivider(
             modifier = Modifier.fillMaxWidth(),
@@ -53,7 +54,7 @@ fun ProjectTab(
         )
         ProjectContents(
             modifier = Modifier.fillMaxWidth(),
-            selectedBoardIndex = project.currentBoardIndex,
+            selectedBoardIndex = project.selectedBoardIndex,
             onBoardSelected = onBoardSelected,
             boards = project.boards,
         )
@@ -111,12 +112,11 @@ private fun ProjectTabHeader(
  */
 @Composable
 private fun ProjectContents(
-    boards: List<Board>,
     modifier: Modifier = Modifier,
+    boards: List<Board> = emptyList(),
     selectedBoardIndex: Int = 0,
     onBoardSelected: (Int) -> Unit = {},
 ) {
-
     Column(
         modifier = modifier
             .fillMaxHeight()
@@ -132,4 +132,16 @@ private fun ProjectContents(
             )
         }
     }
+}
+
+@Preview
+@Composable
+fun ProjectTabPreview() {
+    ProjectTab(
+        project = Project(
+            boards = emptyList(),
+            title = "프로젝트 제목",
+            description = "프로젝트 설명",
+        ),
+    )
 }

@@ -51,7 +51,7 @@
   - [x] 도메인은 유효성 판단만 수행하도록 수정
   - [ ] 리팩토링에 따른 UI / Test 로직 수정
 - [ ] State Hoisting 관련 함수 수정
-  - [ ] ProjectScreen
+  - [x] ProjectScreen
   - [x] BoardScreen
   - [x] CardScreen
   - [ ] 리팩토링에 따른 UI / Test 로직 수정

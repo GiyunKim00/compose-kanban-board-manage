@@ -20,17 +20,17 @@ import woowacourse.kanban.ui.board.BoardScreen
 fun ProjectScreen() {
     var project by remember {
         mutableStateOf(
-            sampleProject()
+            sampleProject(),
         )
     }
 
-    ProjectScreen(
+    ProjectScreenContents(
         project = project,
         onBoardSelected = { boardIndex ->
             project = project.switchBoard(boardIndex)
         },
         onAddNewCard = { card ->
-            project = project.updateBoard(project.selectedBoard + card)
+            project = project.updateBoard(project.boards[project.selectedBoardIndex] + card)
         },
         onBoardChange = { board ->
             project = project.updateBoard(board)
@@ -47,7 +47,7 @@ fun ProjectScreen() {
  * @param onBoardChange 보드 데이터를 변경합니다.
  */
 @Composable
-fun ProjectScreen(
+fun ProjectScreenContents(
     modifier: Modifier = Modifier,
     project: Project = sampleProject(),
     onBoardSelected: (Int) -> Unit = {},
@@ -62,7 +62,7 @@ fun ProjectScreen(
             onBoardSelected = onBoardSelected,
         )
         BoardScreen(
-            board = project.selectedBoard,
+            board = project.boards[project.selectedBoardIndex],
             onAddCard = onAddNewCard,
             onBoardChange = onBoardChange,
         )
@@ -73,10 +73,10 @@ fun ProjectScreen(
 
 private fun sampleProject(): Project {
     return Project(
-        boardList = listOf(
+        boards = listOf(
             Board(
-                boardTitle = "Compose1",
-                cardList = listOf(
+                title = "Compose1",
+                cards = listOf(
                     Card.create(
                         title = "제목1",
                         content = "",
@@ -101,8 +101,8 @@ private fun sampleProject(): Project {
                 ),
             ),
             Board(
-                boardTitle = "Compose2",
-                cardList = listOf(
+                title = "Compose2",
+                cards = listOf(
                     Card.create(
                         title = "제목4",
                         content = "",
@@ -113,13 +113,13 @@ private fun sampleProject(): Project {
                 ),
             ),
             Board(
-                boardTitle = "Compose3너무너무긴제목",
-                cardList = emptyList(),
+                title = "Compose3너무너무긴제목",
+                cards = emptyList(),
             ),
         ),
         selectedBoardIndex = 0,
-        projectTitle = "프로젝트 제목",
-        projectDescription = "프로젝트 설명",
+        title = "프로젝트 제목",
+        description = "프로젝트 설명",
     )
 }
 
