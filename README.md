@@ -60,7 +60,7 @@
 - [ ] Preview Annotation 수정
 - [ ] Preview Code 위치 수정
 - [x] CardFormState 관련 피드백 반영
-- [ ] ActionButton 관련 피드백 반영
-  - [ ] 모델 분리
-  - [ ] 컴포저블 명칭 변경
+- [x] ActionButton 관련 피드백 반영
+  - [x] 모델 분리
+  - [x] 컴포저블 명칭 변경
 - [ ] ErrorColor 정의
