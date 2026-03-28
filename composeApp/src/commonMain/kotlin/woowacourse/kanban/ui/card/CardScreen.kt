@@ -112,12 +112,12 @@ fun CardScreen(
         modifier = modifier
             .background(
                 color = Color(0xffffffff),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
             )
             .border(
                 color = Color(0xffE5E7Eb),
                 width = 1.dp,
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
             )
             .padding(all = 17.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -181,13 +181,6 @@ private fun CardTitle(title: String, modifier: Modifier = Modifier) {
     )
 }
 
-@Preview(backgroundColor = 0xffffffff, showBackground = true)
-@Composable
-fun CardTitlePreview() {
-    CardTitle(title = "Card Title")
-}
-
-
 /**
  * 최대 2줄까지 표시되는 Card의 Content입니다.
  * @param modifier Modifier
@@ -205,12 +198,6 @@ private fun CardContent(modifier: Modifier = Modifier, content: String) {
         overflow = TextOverflow.Ellipsis,
         modifier = modifier,
     )
-}
-
-@Preview(backgroundColor = 0xffffffff, showBackground = true)
-@Composable
-fun CardContentPreview() {
-    CardContent(content = "Card Content")
 }
 
 /**
@@ -246,18 +233,12 @@ private fun TagChip(modifier: Modifier = Modifier, chipContent: String) {
         modifier = modifier
             .background(
                 color = Color(0xfff3f4f6),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
             )
             .padding(vertical = 5.dp, horizontal = 8.dp),
     ) {
         Text(text = chipContent, fontWeight = FontWeight.W400, fontSize = 12.sp)
     }
-}
-
-@Preview(backgroundColor = 0xffffffff, showBackground = true)
-@Composable
-fun TagChipPreview() {
-    TagChip(chipContent = "Tag")
 }
 
 /**
@@ -288,6 +269,24 @@ private fun CardAccountInfo(
             overflow = TextOverflow.Ellipsis,
         )
     }
+}
+
+@Preview(backgroundColor = 0xffffffff, showBackground = true)
+@Composable
+fun CardTitlePreview() {
+    CardTitle(title = "Card Title")
+}
+
+@Preview(backgroundColor = 0xffffffff, showBackground = true)
+@Composable
+fun CardContentPreview() {
+    CardContent(content = "Card Content")
+}
+
+@Preview(backgroundColor = 0xffffffff, showBackground = true)
+@Composable
+fun TagChipPreview() {
+    TagChip(chipContent = "Tag")
 }
 
 @Preview(backgroundColor = 0xffffffff, showBackground = true)

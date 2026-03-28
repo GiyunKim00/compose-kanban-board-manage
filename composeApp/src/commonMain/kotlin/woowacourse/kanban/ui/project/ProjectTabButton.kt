@@ -34,15 +34,15 @@ fun ProjectTabButton(
 ) {
     val tabColor = if (isSelected) Color(0xFFEEF2FF) else Color.White
     val textColor = if (isSelected) Color(0xFF432DD7) else Color.Black
-    val elevationDp = if(isSelected) 2.dp else 0.dp
+    val elevationDp = if (isSelected) 2.dp else 0.dp
 
     Box(
         modifier
-            .shadow(elevation = elevationDp, shape = RoundedCornerShape(10.dp) )
+            .shadow(elevation = elevationDp, shape = RoundedCornerShape(10.dp))
             .clip(shape = RoundedCornerShape(10.dp))
             .background(color = tabColor)
             .padding(vertical = 12.dp, horizontal = 15.dp)
-            .clickable { onClick() }            ,
+            .clickable { onClick() },
         contentAlignment = Alignment.CenterStart,
     ) {
         Text(
