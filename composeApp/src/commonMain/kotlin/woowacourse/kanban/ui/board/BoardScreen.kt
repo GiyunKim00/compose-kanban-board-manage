@@ -394,7 +394,10 @@ private fun BoardCardColumn(
                 }
             }
             .then(
-                if (isDropTarget) Modifier.border(2.dp, headerColor, RoundedCornerShape(12.dp)) else modifier,
+                if (isDropTarget)
+                    Modifier.border(2.dp, headerColor, RoundedCornerShape(12.dp))
+                else
+                    Modifier,
             ),
     ) {
         Row(
