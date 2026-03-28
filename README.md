@@ -56,10 +56,10 @@
   - [ ] CardScreen
   - [ ] 리팩토링에 따른 UI / Test 로직 수정
 - [x] Board, Project를 data class로 리팩토링
-- [ ] CommonTitleText 제거 및 TextStyle 작성
+- [x] CommonTitleText 제거 및 TextStyle 작성
 - [ ] Preview Annotation 수정
 - [ ] Preview Code 위치 수정
-- [ ] CardFormState 관련 피드백 반영
+- [x] CardFormState 관련 피드백 반영
 - [ ] ActionButton 관련 피드백 반영
   - [ ] 모델 분리
   - [ ] 컴포저블 명칭 변경
