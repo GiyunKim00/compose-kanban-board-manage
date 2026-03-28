@@ -132,14 +132,24 @@ class CardDataTest {
     }
 
     @Test
-    fun `잘못된 태그 문자열이 주어질 시 false가 반환된다`() {
-        assertFalse(Card.isValidTag(",..."))
+    fun `빈 태그가 포함되면 InvalidBlankTag를 반환한다`() {
+        val result = Card.validateTag(",...")
+
+        assertTrue(result is TagValidationResult.InvalidBlankTag)
     }
 
     @Test
-    fun `잘못된 태그 문자열이 주어질 시 에러메시지가 반환된다`() {
-        assertEquals("태그 형식이 올바르지 않습니다.", Card.isValidTagInfo(",..."))
-        assertEquals("태그는 5자 이내로 5개까지만 등록할 수 있습니다.", Card.isValidTagInfo("태그1,태그2,태그3,태그4,태그5,태그6"))
+    fun `태그 개수가 초과되면 TooManyTags를 반환한다`() {
+        val result = Card.validateTag("태그1,태그2,태그3,태그4,태그5,태그6")
+
+        assertTrue(result is TagValidationResult.TooManyTags)
+    }
+
+    @Test
+    fun `태그 길이가 초과되면 TooLongTag를 반환한다`() {
+        val result = Card.validateTag("123456")
+
+        assertTrue(result is TagValidationResult.TooLongTag)
     }
 
     @Test
