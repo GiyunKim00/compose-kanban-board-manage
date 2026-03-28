@@ -45,3 +45,22 @@
 - [x] 태스크를 옮기면 태스크 상태 및 통계값이 갱신된다.
     - [x] 태스크 상태가 변경된다.
     - [x] 태스크 완료율이 변경된다.
+
+## 피드백
+- [ ] Card 도메인 내 검증 로직 및 메시지 표현 책임 혼재 분리
+  - [ ] 도메인은 유효성 판단만 수행하도록 수정
+  - [ ] 리팩토링에 따른 UI / Test 로직 수정
+- [ ] State Hoisting 관련 함수 수정
+  - [ ] ProjectScreen
+  - [ ] BoardScreen
+  - [ ] CardScreen
+  - [ ] 리팩토링에 따른 UI / Test 로직 수정
+- [ ] Board, Project를 data class로 리팩토링
+- [ ] CommonTitleText 제거 및 TextStyle 작성
+- [ ] Preview Annotation 수정
+- [ ] Preview Code 위치 수정
+- [ ] CardFormState 관련 피드백 반영
+- [ ] ActionButton 관련 피드백 반영
+  - [ ] 모델 분리
+  - [ ] 컴포저블 명칭 변경
+- [ ] ErrorColor 정의
