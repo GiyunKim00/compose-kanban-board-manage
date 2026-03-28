@@ -53,7 +53,7 @@
 - [ ] State Hoisting 관련 함수 수정
   - [ ] ProjectScreen
   - [ ] BoardScreen
-  - [ ] CardScreen
+  - [x] CardScreen
   - [ ] 리팩토링에 따른 UI / Test 로직 수정
 - [x] Board, Project를 data class로 리팩토링
 - [x] CommonTitleText 제거 및 TextStyle 작성
@@ -63,4 +63,4 @@
 - [x] ActionButton 관련 피드백 반영
   - [x] 모델 분리
   - [x] 컴포저블 명칭 변경
-- [ ] ErrorColor 정의
+- [x] ErrorColor 정의

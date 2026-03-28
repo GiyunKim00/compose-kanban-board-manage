@@ -36,28 +36,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import woowacourse.kanban.domain.card.Card
+import woowacourse.kanban.domain.card.CardManagerState
+import woowacourse.kanban.domain.card.CardTaskState
+import woowacourse.kanban.domain.card.TagValidationResult
+import woowacourse.kanban.domain.card.TitleValidationResult
+import woowacourse.kanban.ui.board.common.toDisplayText
+import woowacourse.kanban.ui.card.creation.CardCreationPanelFormSection
+import woowacourse.kanban.ui.card.creation.CardFormState
+import woowacourse.kanban.ui.card.creation.PanelButton
+import woowacourse.kanban.ui.card.creation.PanelButtonDefaultSetting
+import woowacourse.kanban.ui.card.creation.message
 import woowacourse.kanban.ui.theme.KanbanCardColor.DefaultBackground
 import woowacourse.kanban.ui.theme.KanbanCardColor.DefaultContent
 import woowacourse.kanban.ui.theme.KanbanCardColor.SelectedBackground
 import woowacourse.kanban.ui.theme.KanbanCardColor.SelectedContent
-import woowacourse.kanban.domain.board.CardFormState
-import woowacourse.kanban.domain.card.Card
-import woowacourse.kanban.domain.card.CardManagerState
-import woowacourse.kanban.domain.card.CardTaskState
-import woowacourse.kanban.ui.board.common.toDisplayText
-import woowacourse.kanban.ui.card.creation.ActionButton
-import woowacourse.kanban.ui.card.creation.ActionButtonType
-import woowacourse.kanban.ui.card.creation.CardCreationPanelFormSection
-import woowacourse.kanban.ui.card.creation.TitleText
-
-@Preview(widthDp = 672, heightDp = 909)
-@Composable
-fun CardCreationScreenRoot() {
-    CardCreationScreen(
-        onAddItem = {},
-        onDismiss = {},
-    )
-}
+import woowacourse.kanban.ui.theme.Typography.CardCreationTitle
 
 @Composable
 fun CardCreationScreen(
@@ -65,11 +59,15 @@ fun CardCreationScreen(
     onAddItem: (Card) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    var cardFormState by remember { mutableStateOf(CardFormState()) }
+
     Dialog(
         onDismissRequest = onDismiss,
     ) {
         CardCreationScreenContents(
             modifier = modifier,
+            cardFormState = cardFormState,
+            onCardFormStateChange = { cardFormState = it },
             onAddItem = onAddItem,
             onDismiss = onDismiss,
         )
@@ -77,12 +75,15 @@ fun CardCreationScreen(
 }
 
 @Composable
-private fun CardCreationScreenContents(
+internal fun CardCreationScreenContents(
     modifier: Modifier = Modifier,
+    cardFormState: CardFormState,
+    onCardFormStateChange: (CardFormState) -> Unit,
     onAddItem: (Card) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var cardFormState by remember { mutableStateOf(CardFormState()) }
+    val titleValidationResult = cardFormState.titleValidationResult
+    val tagValidationResult = cardFormState.tagValidationResult
 
     OutlinedCard(
         modifier = modifier.testTag("생성 모달 열림"),
@@ -106,50 +107,56 @@ private fun CardCreationScreenContents(
                 CardCreationPanelFormSection(
                     title = "제목 *",
                     placeholder = "태스크 제목을 입력하세요",
-                    value = cardFormState.title,
+                    contents = cardFormState.title,
                     onTextChange = {
-                        cardFormState = cardFormState.copy(title = it)
+                        onCardFormStateChange(cardFormState.copy(title = it))
                     },
-                    showAdditionalInfo = !Card.isValidText(cardFormState.title),
+                    showAdditionalInfo = titleValidationResult !is TitleValidationResult.Valid,
                     testTag = "titleTextField",
-                    infoText = Card.getTitleInfo(),
-                    isError = !Card.isValidText(cardFormState.title),
+                    infoText = titleValidationResult.message(),
+                    isError = titleValidationResult !is TitleValidationResult.Valid,
                 )
 
                 CardCreationPanelFormSection(
                     title = "설명",
                     placeholder = "태스크에 대한 자세한 설명을 입력하세요",
-                    value = cardFormState.content,
-                    onTextChange = { cardFormState = cardFormState.copy(content = it) },
+                    contents = cardFormState.content,
+                    onTextChange = {
+                        onCardFormStateChange(cardFormState.copy(content = it))
+                    },
                     testTag = "descriptionTextField",
                 )
 
                 CardCreationPanelFormSection(
                     title = "태그",
                     placeholder = "태그를 쉼표로 구분하여 입력하세요 (예: 버그, 긴급)",
-                    value = cardFormState.tagInput,
+                    contents = cardFormState.tagInput,
                     onTextChange = {
-                        cardFormState = cardFormState.copy(tagInput = it)
+                        onCardFormStateChange(cardFormState.copy(tagInput = it))
                     },
                     showAdditionalInfo = true,
                     testTag = "tagTextField",
-                    infoText = cardFormState.tagInfoText,
-                    isError = !Card.isValidTag(cardFormState.tagInput),
+                    infoText = tagValidationResult.message(),
+                    isError = tagValidationResult !is TagValidationResult.Valid,
                 )
 
                 CardCreationPanelStateSection(
                     selectedState = cardFormState.taskState,
-                    onStateChange = { cardFormState = cardFormState.copy(taskState = it) },
+                    onStateChange = {
+                        onCardFormStateChange(cardFormState.copy(taskState = it))
+                    },
                 )
 
                 CardCreationPanelManagerSection(
                     selectedManager = cardFormState.managerState,
-                    onManagerChange = { cardFormState = cardFormState.copy(managerState = it) },
+                    onManagerChange = {
+                        onCardFormStateChange(cardFormState.copy(managerState = it))
+                    },
                 )
 
                 HorizontalDivider(modifier = Modifier.fillMaxWidth())
 
-                ActionButtonSection(
+                PanelButtonSection(
                     createEnabled = cardFormState.isCreateEnabled,
                     onCancelClick = onDismiss,
                     onCreateClick = {
@@ -202,7 +209,10 @@ private fun CardCreationPanelStateSection(
     onStateChange: (CardTaskState) -> Unit,
 ) {
     Column {
-        TitleText("상태 *")
+        Text(
+            text = "상태 *",
+            style = CardCreationTitle,
+        )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -259,7 +269,10 @@ private fun CardCreationPanelManagerSection(
     onManagerChange: (CardManagerState) -> Unit,
 ) {
     Column {
-        TitleText("담당자 *")
+        Text(
+            text = "담당자 *",
+            style = CardCreationTitle,
+        )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -323,7 +336,7 @@ private fun ManagerButton(
 }
 
 @Composable
-private fun ActionButtonSection(
+private fun PanelButtonSection(
     createEnabled: Boolean,
     modifier: Modifier = Modifier,
     onCancelClick: () -> Unit,
@@ -334,16 +347,31 @@ private fun ActionButtonSection(
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        ActionButton(
-            buttonType = ActionButtonType.SECONDARY,
+        PanelButton(
+            text = "취소",
+            contentColor = PanelButtonDefaultSetting.CancelContentColor,
+            containerColor = PanelButtonDefaultSetting.CancelContainerColor,
+            elevation = PanelButtonDefaultSetting.CancelElevation,
             enabled = true,
             onClick = onCancelClick,
         )
         Spacer(modifier = Modifier.width(12.dp))
-        ActionButton(
-            buttonType = ActionButtonType.PRIMARY,
+        PanelButton(
+            text = "생성",
+            contentColor = PanelButtonDefaultSetting.CreateContentColor,
+            containerColor = PanelButtonDefaultSetting.CreateContainerColor,
+            elevation = PanelButtonDefaultSetting.CreateElevation,
             enabled = createEnabled,
             onClick = onCreateClick,
         )
     }
+}
+
+@Preview(widthDp = 672, heightDp = 909)
+@Composable
+fun CardCreationScreenPreview() {
+    CardCreationScreen(
+        onAddItem = {},
+        onDismiss = {},
+    )
 }
