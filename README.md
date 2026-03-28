@@ -47,14 +47,14 @@
     - [x] 태스크 완료율이 변경된다.
 
 ## 피드백
-- [ ] Card 도메인 내 검증 로직 및 메시지 표현 책임 혼재 분리
+- [x] Card 도메인 내 검증 로직 및 메시지 표현 책임 혼재 분리
   - [x] 도메인은 유효성 판단만 수행하도록 수정
-  - [ ] 리팩토링에 따른 UI / Test 로직 수정
-- [ ] State Hoisting 관련 함수 수정
+  - [x] 리팩토링에 따른 UI / Test 로직 수정
+- [x] State Hoisting 관련 함수 수정
   - [x] ProjectScreen
   - [x] BoardScreen
   - [x] CardScreen
-  - [ ] 리팩토링에 따른 UI / Test 로직 수정
+  - [x] 리팩토링에 따른 UI / Test 로직 수정
 - [x] Board, Project를 data class로 리팩토링
 - [x] CommonTitleText 제거 및 TextStyle 작성
 - [x] Preview Annotation 수정

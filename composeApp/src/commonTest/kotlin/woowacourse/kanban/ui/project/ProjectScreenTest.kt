@@ -10,7 +10,6 @@ import woowacourse.kanban.domain.board.Board
 import woowacourse.kanban.domain.card.Card
 import woowacourse.kanban.domain.card.CardManagerState
 import woowacourse.kanban.domain.card.CardTaskState
-import woowacourse.kanban.domain.project.Project
 import woowacourse.kanban.ui.board.BoardScreen
 import kotlin.test.Test
 
@@ -42,15 +41,15 @@ class ProjectScreenTest {
         setContent {
             BoardScreen(
                 board = Board(
-                    listOf(
+                    cards = listOf(
                         Card.create(
                             title = "드래그테스트",
                             content = "TODO 에서 DONE 으로 이동",
                             tags = listOf("드래그"),
                             manager = CardManagerState.DINO,
                             state = CardTaskState.TODO,
-                        )
-                    )
+                        ),
+                    ),
                 ),
                 onAddCard = {},
                 onBoardChange = {},
