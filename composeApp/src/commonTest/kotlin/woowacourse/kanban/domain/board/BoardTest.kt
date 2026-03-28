@@ -60,7 +60,7 @@ class BoardTest {
             ),
         )
 
-        val board = Board(cardList)
+        val board = Board(cards = cardList)
 
         assertThat(board.toDoTaskCount).isEqualTo(2)
         assertThat(board.inProgressTaskCount).isEqualTo(1)
@@ -110,7 +110,7 @@ class BoardTest {
             ),
         )
 
-        val board = Board(cardList)
+        val board = Board(cards = cardList)
         assertThat(board.completionPercentage).isEqualTo(33)
     }
 
@@ -140,7 +140,7 @@ class BoardTest {
             ),
         )
 
-        val board = Board(cardList)
+        val board = Board(cards = cardList)
         assertThat(board.completionPercentage).isEqualTo(100)
     }
 }
