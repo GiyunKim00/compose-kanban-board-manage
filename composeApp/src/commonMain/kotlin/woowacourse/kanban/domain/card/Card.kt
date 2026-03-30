@@ -1,7 +1,7 @@
 package woowacourse.kanban.domain.card
 
 import woowacourse.kanban.domain.card.Card.Companion.create
-import java.util.UUID
+import woowacourse.kanban.domain.common.generateId
 
 /**
  * Card 도메인 모델입니다.
@@ -17,42 +17,6 @@ class Card private constructor(
     val taskState: CardTaskState,
 ) {
     companion object {
-        private const val MAX_TAG_COUNT = 5
-        private const val MAX_TAG_LENGTH = 5
-
-        fun validateTitle(rawText: String): TitleValidationResult {
-            return if (rawText.trim().isNotBlank()) {
-                TitleValidationResult.Valid
-            } else {
-                TitleValidationResult.Blank
-            }
-        }
-
-        fun parseTag(rawText: String): List<String> {
-            if (rawText.isBlank()) return emptyList()
-            return rawText.split(",").map { it.trim() }
-        }
-
-        fun validateTag(rawText: String): TagValidationResult {
-            if (rawText.isBlank()) return TagValidationResult.Valid
-
-            val parsedTags = parseTag(rawText)
-
-            if (parsedTags.any { it.isBlank() }) {
-                return TagValidationResult.InvalidBlankTag
-            }
-
-            if (parsedTags.size > MAX_TAG_COUNT) {
-                return TagValidationResult.TooManyTags
-            }
-
-            if (parsedTags.any { it.length > MAX_TAG_LENGTH }) {
-                return TagValidationResult.TooLongTag
-            }
-
-            return TagValidationResult.Valid
-        }
-
         /**
          * [Card] 객체 생성 팩토리 메서드입니다.
          * @param title 필수 | 제목
@@ -69,24 +33,19 @@ class Card private constructor(
             manager: CardManagerState,
             state: CardTaskState,
         ): Card {
-            require(validateTitle(title) is TitleValidationResult.Valid) {
+            require(CardValidator.validateTitle(title).isValid) {
                 "[Card] 제목은 필수 입력 항목입니다."
             }
 
-            val normalizedTags = tags
-                .map { it.trim() }
-                .filter { it.isNotEmpty() }
+            require(CardValidator.validateTags(tags).isValid) {
+                "[Card] 태그 형식이 올바르지 않습니다."
+            }
 
-            require(normalizedTags.size <= MAX_TAG_COUNT) {
-                "[Card] 태그는 최대 ${MAX_TAG_COUNT}개까지 가능합니다."
-            }
-            require(normalizedTags.all { it.length <= MAX_TAG_LENGTH }) {
-                "[Card] 태그는 최대 ${MAX_TAG_LENGTH}자까지 가능합니다."
-            }
+            val normalizedTags = CardValidator.normalizeTags(tags)
 
             return Card(
-                id = UUID.randomUUID().toString(),
-                title = title,
+                id = generateId(),
+                title = title.trim(),
                 content = content,
                 tags = normalizedTags,
                 managerState = manager,

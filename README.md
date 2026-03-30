@@ -70,9 +70,8 @@
 - [x] ProjectScreenContents internal 적용 및 default parameter 정리
 - [x] 도메인 로직으로부터 generateId 분리
 - [x] 연산자 오버로딩 방식을 명확한 메서드로 변경
-- [ ] CardValidationResult의 sealed class가 유효 여부를 직접 가지도록 수정
-- [ ] Card companion object 내 팩토리 메서드 제외 기타 메서드 분리
-  - [ ] 메서드 분리에 따른 UI 로직 수정
+- [x] CardValidationResult의 sealed class가 유효 여부를 직접 가지도록 수정
+- [x] Card companion object 내 팩토리 메서드 제외 기타 메서드 분리
   - [ ] 테스트 로직 수정
 - [ ] Card, Board 테스트 로직 보강
   - [ ] ProjectTest 코드 내 Board 관련 테스트 로직 제거
