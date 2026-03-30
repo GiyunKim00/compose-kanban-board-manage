@@ -67,7 +67,7 @@
 - [x] ErrorColor 정의
 
 ### 2차
-- [ ] ProjectScreenContents internal 적용 및 default parameter 정리
+- [x] ProjectScreenContents internal 적용 및 default parameter 정리
 - [ ] 도메인 로직으로부터 generateId 분리
 - [ ] 연산자 오버로딩 방식을 명확한 메서드로 변경
 - [ ] CardValidationResult의 sealed class가 유효 여부를 직접 가지도록 수정

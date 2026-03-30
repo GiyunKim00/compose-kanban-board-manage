@@ -19,9 +19,7 @@ import woowacourse.kanban.ui.board.BoardScreen
 @Composable
 fun ProjectScreen() {
     var project by remember {
-        mutableStateOf(
-            sampleProject(),
-        )
+        mutableStateOf(sampleProject())
     }
 
     ProjectScreenContents(
@@ -30,7 +28,9 @@ fun ProjectScreen() {
             project = project.switchBoard(boardIndex)
         },
         onAddNewCard = { card ->
-            project = project.updateBoard(project.boards[project.selectedBoardIndex] + card)
+            project = project.updateBoard(
+                project.boards[project.selectedBoardIndex].addCard(card),
+            )
         },
         onBoardChange = { board ->
             project = project.updateBoard(board)
@@ -47,9 +47,9 @@ fun ProjectScreen() {
  * @param onBoardChange 보드 데이터를 변경합니다.
  */
 @Composable
-fun ProjectScreenContents(
+internal fun ProjectScreenContents(
+    project: Project,
     modifier: Modifier = Modifier,
-    project: Project = sampleProject(),
     onBoardSelected: (Int) -> Unit = {},
     onAddNewCard: (Card) -> Unit = {},
     onBoardChange: (Board) -> Unit = {},
