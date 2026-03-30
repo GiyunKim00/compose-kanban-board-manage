@@ -2,6 +2,7 @@ package woowacourse.kanban.ui.card
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,10 +20,19 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -44,9 +54,28 @@ import woowacourse.kanban.ui.board.common.toDisplayText
 fun CardScreen(
     modifier: Modifier = Modifier,
     cardData: Card,
+    onDragStart: () -> Unit = {},
+    onDragChange: (Offset) -> Unit = {},
+    onDragEnd: () -> Unit = {},
+    onDragCancel: () -> Unit = {},
 ) {
+    var cardWindowPosition by remember { mutableStateOf(Offset.Zero) }
+
     CardScreen(
-        modifier = modifier,
+        modifier = modifier
+            .testTag("카드_${cardData.title}")
+            .onGloballyPositioned { cardWindowPosition = it.positionInWindow() }
+            .pointerInput(Unit) {
+                detectDragGestures(
+                    onDragStart = { onDragStart() },
+                    onDrag = { change, _ ->
+                        change.consume()
+                        onDragChange(cardWindowPosition + change.position)
+                    },
+                    onDragEnd = { onDragEnd() },
+                    onDragCancel = { onDragCancel() },
+                )
+            },
         title = cardData.title,
         content = cardData.content,
         tags = cardData.tags,
@@ -83,12 +112,12 @@ fun CardScreen(
         modifier = modifier
             .background(
                 color = Color(0xffffffff),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
             )
             .border(
                 color = Color(0xffE5E7Eb),
                 width = 1.dp,
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
             )
             .padding(all = 17.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -152,13 +181,6 @@ private fun CardTitle(title: String, modifier: Modifier = Modifier) {
     )
 }
 
-@Preview(backgroundColor = 0xffffffff, showBackground = true)
-@Composable
-fun CardTitlePreview() {
-    CardTitle(title = "Card Title")
-}
-
-
 /**
  * 최대 2줄까지 표시되는 Card의 Content입니다.
  * @param modifier Modifier
@@ -176,12 +198,6 @@ private fun CardContent(modifier: Modifier = Modifier, content: String) {
         overflow = TextOverflow.Ellipsis,
         modifier = modifier,
     )
-}
-
-@Preview(backgroundColor = 0xffffffff, showBackground = true)
-@Composable
-fun CardContentPreview() {
-    CardContent(content = "Card Content")
 }
 
 /**
@@ -217,18 +233,12 @@ private fun TagChip(modifier: Modifier = Modifier, chipContent: String) {
         modifier = modifier
             .background(
                 color = Color(0xfff3f4f6),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
             )
             .padding(vertical = 5.dp, horizontal = 8.dp),
     ) {
         Text(text = chipContent, fontWeight = FontWeight.W400, fontSize = 12.sp)
     }
-}
-
-@Preview(backgroundColor = 0xffffffff, showBackground = true)
-@Composable
-fun TagChipPreview() {
-    TagChip(chipContent = "Tag")
 }
 
 /**
@@ -259,6 +269,24 @@ private fun CardAccountInfo(
             overflow = TextOverflow.Ellipsis,
         )
     }
+}
+
+@Preview(backgroundColor = 0xffffffff, showBackground = true)
+@Composable
+fun CardTitlePreview() {
+    CardTitle(title = "Card Title")
+}
+
+@Preview(backgroundColor = 0xffffffff, showBackground = true)
+@Composable
+fun CardContentPreview() {
+    CardContent(content = "Card Content")
+}
+
+@Preview(backgroundColor = 0xffffffff, showBackground = true)
+@Composable
+fun TagChipPreview() {
+    TagChip(chipContent = "Tag")
 }
 
 @Preview(backgroundColor = 0xffffffff, showBackground = true)

@@ -9,7 +9,7 @@ import kotlin.test.assertTrue
 /**
  * [Card] Unit 테스트 클래스입니다.
  */
-class CardDataTest {
+class CardTest {
     @Test
     fun `제목이 공백 문자만 있으면 생성할 수 없다`() {
         val invalidTitles = listOf("   ", "\t", "\n", " \n\t ")
@@ -67,19 +67,6 @@ class CardDataTest {
     }
 
     @Test
-    fun `공백으로만 구성된 태그는 제거된다`() {
-        val cardData = Card.create(
-            title = "제목",
-            content = "내용",
-            tags = listOf("태그1", "   ", "", "  "),
-            manager = CardManagerState.DINO,
-            state = CardTaskState.TODO,
-        )
-
-        assertEquals(listOf("태그1"), cardData.tags)
-    }
-
-    @Test
     fun `태그가 5개를 초과하면 생성할 수 없다`() {
         assertFailsWith<IllegalArgumentException> {
             Card.create(
@@ -106,11 +93,24 @@ class CardDataTest {
     }
 
     @Test
+    fun `공백 태그가 포함되면 생성할 수 없다`() {
+        assertFailsWith<IllegalArgumentException> {
+            Card.create(
+                title = "제목",
+                content = "내용",
+                tags = listOf("태그1", "   ", "", "  "),
+                manager = CardManagerState.DINO,
+                state = CardTaskState.TODO,
+            )
+        }
+    }
+
+    @Test
     fun `태그가 있으면 hasTag 리턴 값은 true이다`() {
         val cardData = Card.create(
             title = "제목",
             content = "내용",
-            tags = listOf("태그1", "   "),
+            tags = listOf("태그1"),
             manager = CardManagerState.DINO,
             state = CardTaskState.TODO,
         )
@@ -119,34 +119,31 @@ class CardDataTest {
     }
 
     @Test
-    fun `태그가 비어 있으면 hasTag 리턴 값은 false이다`() {
-        val cardData = Card.create(
-            title = "제목",
-            content = "내용",
-            tags = listOf("   ", ""),
-            manager = CardManagerState.DINO,
-            state = CardTaskState.TODO,
-        )
+    fun `빈 태그가 포함되면 InvalidBlankTag를 반환한다`() {
+        val result = CardValidator.validateTags(",...")
 
-        assertFalse(cardData.hasTag())
+        assertEquals(TagValidationResult.InvalidBlankTag, result)
     }
 
     @Test
-    fun `잘못된 태그 문자열이 주어질 시 false가 반환된다`() {
-        assertFalse(Card.isValidTag(",..."))
+    fun `태그 개수가 초과되면 TooManyTags를 반환한다`() {
+        val result = CardValidator.validateTags("태그1,태그2,태그3,태그4,태그5,태그6")
+
+        assertEquals(TagValidationResult.TooManyTags, result)
     }
 
     @Test
-    fun `잘못된 태그 문자열이 주어질 시 에러메시지가 반환된다`() {
-        assertEquals("태그 형식이 올바르지 않습니다.", Card.isValidTagInfo(",..."))
-        assertEquals("태그는 5자 이내로 5개까지만 등록할 수 있습니다.", Card.isValidTagInfo("태그1,태그2,태그3,태그4,태그5,태그6"))
+    fun `태그 길이가 초과되면 TooLongTag를 반환한다`() {
+        val result = CardValidator.validateTags("123456")
+
+        assertEquals(TagValidationResult.TooLongTag, result)
     }
 
     @Test
     fun `쉼표를 기준으로 태그 문자열을 분리한다`() {
         assertEquals(
             listOf("태그1", "태그2", "태그3"),
-            Card.parseTag("태그1,태그2,태그3"),
+            CardValidator.parseTags("태그1,태그2,태그3"),
         )
     }
 
@@ -154,7 +151,27 @@ class CardDataTest {
     fun `태그 문자열의 앞뒤 공백을 제거한 후 쉼표를 기준으로 분리한다`() {
         assertEquals(
             listOf("태그1", "태그2"),
-            Card.parseTag("태그1,태그2   "),
+            CardValidator.parseTags("태그1,태그2   "),
         )
+    }
+
+    @Test
+    fun `카드 상태를 변경하면 상태가 변경된 새 카드가 반환된다`() {
+        val card = Card.create(
+            title = "제목",
+            content = "내용",
+            tags = listOf("태그"),
+            manager = CardManagerState.DINO,
+            state = CardTaskState.TODO,
+        )
+
+        val updatedCard = card.updateWithNewState(CardTaskState.DONE)
+
+        assertEquals(updatedCard.taskState, CardTaskState.DONE)
+        assertEquals(updatedCard.id, card.id)
+        assertEquals(updatedCard.title, card.title)
+        assertEquals(updatedCard.content, card.content)
+        assertEquals(updatedCard.tags, card.tags)
+        assertEquals(updatedCard.managerState, card.managerState)
     }
 }

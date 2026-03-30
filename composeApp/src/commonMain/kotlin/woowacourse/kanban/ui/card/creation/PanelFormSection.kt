@@ -18,34 +18,38 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import woowacourse.kanban.board.ui.theme.KanbanCardColor.DefaultContent
+import woowacourse.kanban.ui.theme.KanbanCardColor.DefaultContent
+import woowacourse.kanban.ui.theme.KanbanCardColor.ErrorColor
+import woowacourse.kanban.ui.theme.Typography.CardCreationTitle
 
 @Composable
 fun CardCreationPanelFormSection(
     title: String,
+    contents: String,
     modifier: Modifier = Modifier,
     placeholder: String = "",
-    value: String,
     onTextChange: (String) -> Unit = {},
     showAdditionalInfo: Boolean = false,
-    testTag : String,
+    testTag: String,
     infoText: String = "",
     isError: Boolean = false,
 ) {
-    val errorColor = Color(0xFFB3261E)
     Column(
         modifier = modifier,
     ) {
-        TitleText(title)
+        Text(
+            text = title,
+            style = CardCreationTitle,
+        )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
-            value = value,
+            value = contents,
             onValueChange = { onTextChange(it) },
             trailingIcon = {
                 if (isError) Icon(
                     imageVector = Icons.Default.Error,
                     contentDescription = "에러 아이콘",
-                    tint = errorColor,
+                    tint = ErrorColor,
                 )
             },
             isError = isError,
@@ -59,7 +63,7 @@ fun CardCreationPanelFormSection(
                 )
             },
             textStyle = TextStyle(
-                color = if (isError) errorColor else DefaultContent,
+                color = if (isError) ErrorColor else DefaultContent,
                 fontSize = 16.sp,
                 lineHeight = 24.sp,
                 letterSpacing = 1.sp,
@@ -72,7 +76,7 @@ fun CardCreationPanelFormSection(
         if (showAdditionalInfo) {
             Text(
                 text = infoText,
-                color = if (isError) errorColor else Color(0xFF49454F),
+                color = if (isError) ErrorColor else Color(0xFF49454F),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.W400,
                 lineHeight = 16.sp,

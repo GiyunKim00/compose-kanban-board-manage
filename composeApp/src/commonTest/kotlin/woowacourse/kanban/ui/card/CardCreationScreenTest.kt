@@ -6,7 +6,10 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.runComposeUiTest
+import woowacourse.kanban.domain.card.TagValidationResult
+import woowacourse.kanban.ui.card.creation.message
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @OptIn(ExperimentalTestApi::class)
 class CardCreationScreenTest {
@@ -16,7 +19,7 @@ class CardCreationScreenTest {
         setContent {
             CardCreationScreen(
                 onAddItem = {},
-                onDismiss = {}
+                onDismiss = {},
             )
         }
 
@@ -37,7 +40,7 @@ class CardCreationScreenTest {
         setContent {
             CardCreationScreen(
                 onAddItem = {},
-                onDismiss = {}
+                onDismiss = {},
             )
         }
         onNodeWithTag("titleTextField").performTextInput(" ")
@@ -53,7 +56,7 @@ class CardCreationScreenTest {
         setContent {
             CardCreationScreen(
                 onAddItem = {},
-                onDismiss = {}
+                onDismiss = {},
             )
         }
         onNodeWithTag("titleTextField").performTextInput("\t")
@@ -67,7 +70,7 @@ class CardCreationScreenTest {
         setContent {
             CardCreationScreen(
                 onAddItem = {},
-                onDismiss = {}
+                onDismiss = {},
             )
         }
 
@@ -83,7 +86,7 @@ class CardCreationScreenTest {
         setContent {
             CardCreationScreen(
                 onAddItem = {},
-                onDismiss = {}
+                onDismiss = {},
             )
         }
 
@@ -92,5 +95,19 @@ class CardCreationScreenTest {
             .performTextInput("버그,긴급")
 
         onNodeWithText("5자 이내의 태그를 최대 5개까지 등록할 수 있습니다.").assertExists()
+    }
+
+    @Test
+    fun `InvalidBlankTag는 정의된 메시지를 리턴한다`() {
+        val message = TagValidationResult.InvalidBlankTag.message()
+
+        assertEquals("빈 태그는 입력할 수 없습니다.", message)
+    }
+
+    @Test
+    fun `TooManyTags는 정의된 메시지를 리턴한다`() {
+        val message = TagValidationResult.TooManyTags.message()
+
+        assertEquals("태그는 최대 5개까지 입력할 수 있습니다.", message)
     }
 }

@@ -1,5 +1,6 @@
 package woowacourse.kanban.ui.board
 
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,16 +25,20 @@ class BoardScreenTest {
     fun `보드에 보드 제목, 완료율, 태스크 생성 버튼, 프로그레스 바, ToDo, In Progress, Done Column이 노출된다`() = runComposeUiTest {
         // Given
         setContent {
-            BoardScreen(
-                board = Board(),
+            BoardScreenContents(
+                board = Board(
+                    title = "Compose Desktop 칸반 보드",
+                ),
                 showCardCreationPanel = false,
-                onAddCard = {},
                 onShowCardCreationPanelChange = {},
+                onAddCard = {},
+                onBoardChange = {},
+                snackbarHostState = SnackbarHostState(),
             )
         }
 
         onNodeWithTag("보드 제목").assertExists()
-        onNodeWithText("Compose Desktop 칸반 보드 ").assertExists()
+        onNodeWithText("Compose Desktop 칸반 보드").assertExists()
         onNodeWithText("완료율: 0% (0/0)").assertExists()
         onNodeWithTag("새 태스크 생성 버튼").assertExists()
         onNodeWithTag("프로그레스 바").assertExists()
@@ -48,11 +53,13 @@ class BoardScreenTest {
             var board by remember { mutableStateOf(Board()) }
             var showCardCreationPanel by remember { mutableStateOf(false) }
 
-            BoardScreen(
+            BoardScreenContents(
                 board = board,
                 showCardCreationPanel = showCardCreationPanel,
-                onAddCard = { newCard -> board += newCard },
                 onShowCardCreationPanelChange = { showCardCreationPanel = it },
+                onAddCard = { newCard -> board = board.addCard(newCard) },
+                onBoardChange = {},
+                snackbarHostState = SnackbarHostState(),
             )
         }
 
@@ -63,23 +70,25 @@ class BoardScreenTest {
     @Test
     fun `카드 목록이 표시된다`() = runComposeUiTest {
         val board = Board(
-            listOf(
+            cards = listOf(
                 Card.create(
                     title = "테스트 카드",
                     content = "테스트 내용",
                     tags = listOf("태그"),
                     manager = CardManagerState.DINO,
                     state = CardTaskState.TODO,
-                )
-            )
+                ),
+            ),
         )
 
         setContent {
-            BoardScreen(
+            BoardScreenContents(
                 board = board,
                 showCardCreationPanel = false,
-                onAddCard = {},
                 onShowCardCreationPanelChange = {},
+                onAddCard = {},
+                onBoardChange = {},
+                snackbarHostState = SnackbarHostState(),
             )
         }
 
@@ -92,11 +101,13 @@ class BoardScreenTest {
             var board by remember { mutableStateOf(Board()) }
             var showCardCreationPanel by remember { mutableStateOf(false) }
 
-            BoardScreen(
+            BoardScreenContents(
                 board = board,
                 showCardCreationPanel = showCardCreationPanel,
-                onAddCard = { newCard -> board += newCard },
                 onShowCardCreationPanelChange = { showCardCreationPanel = it },
+                onAddCard = { newCard -> board = board.addCard(newCard) },
+                onBoardChange = { },
+                snackbarHostState = SnackbarHostState(),
             )
         }
 
@@ -116,12 +127,15 @@ class BoardScreenTest {
         setContent {
             var board by remember { mutableStateOf(Board()) }
             var showCardCreationPanel by remember { mutableStateOf(false) }
+            val snackbarHostState by remember { mutableStateOf(SnackbarHostState()) }
 
-            BoardScreen(
+            BoardScreenContents(
                 board = board,
                 showCardCreationPanel = showCardCreationPanel,
-                onAddCard = { newCard -> board += newCard },
                 onShowCardCreationPanelChange = { showCardCreationPanel = it },
+                onAddCard = { newCard -> board = board.addCard(newCard) },
+                onBoardChange = { },
+                snackbarHostState = snackbarHostState,
             )
         }
 
