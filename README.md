@@ -73,6 +73,6 @@
 - [x] CardValidationResult의 sealed class가 유효 여부를 직접 가지도록 수정
 - [x] Card companion object 내 팩토리 메서드 제외 기타 메서드 분리
   - [x] 테스트 로직 수정
-- [ ] Card, Board 테스트 로직 보강
-  - [ ] ProjectTest 코드 내 Board 관련 테스트 로직 제거
-  - [ ] Board moveCard 메서드를 활용한 테스트 로직 정의 및 모호한 테스트 명 수정
+- [x] Card, Board 테스트 로직 보강
+  - [x] ProjectTest 코드 내 Board 관련 테스트 로직 제거
+  - [x] Board moveCard 메서드를 활용한 테스트 로직 정의 및 모호한 테스트 명 수정

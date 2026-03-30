@@ -269,32 +269,31 @@ private fun BoardContents(
     var currentDragPosition by remember { mutableStateOf<Offset?>(null) }
     val columnBounds = remember { mutableStateMapOf<CardTaskState, Rect>() }
 
+    fun taskEnd() {
+        val dropPosition = currentDragPosition
+        val targetStatus = columnBounds.entries
+            .firstOrNull { (_, rect) -> dropPosition?.let { rect.contains(it) } == true }?.key
+
+        draggedTask?.let { task ->
+            if (targetStatus != null && task.taskState != targetStatus) {
+                onChangeContent(board.moveCard(task.id, targetStatus))
+            }
+        }
+        currentDragPosition = null
+        draggedTask = null
+    }
+
+    fun taskDragCancel() {
+        currentDragPosition = null
+        draggedTask = null
+    }
+
     Row(
         modifier = modifier
             .background(Color(0xFFF9FAFB))
             .padding(24.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-
-        fun taskEnd() {
-            val dropPosition = currentDragPosition
-            val targetStatus = columnBounds.entries
-                .firstOrNull { (_, rect) -> dropPosition?.let { rect.contains(it) } == true }?.key
-
-            draggedTask?.let { task ->
-                if (targetStatus != null && task.taskState != targetStatus) {
-                    onChangeContent(board.moveCard(task.id, targetStatus))
-                }
-            }
-            currentDragPosition = null
-            draggedTask = null
-        }
-
-        fun taskDragCancel() {
-            currentDragPosition = null
-            draggedTask = null
-        }
-
         BoardCardColumn(
             modifier = Modifier
                 .width(320.dp)

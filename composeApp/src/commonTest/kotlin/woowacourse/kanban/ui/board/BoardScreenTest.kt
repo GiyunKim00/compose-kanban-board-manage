@@ -57,7 +57,7 @@ class BoardScreenTest {
                 board = board,
                 showCardCreationPanel = showCardCreationPanel,
                 onShowCardCreationPanelChange = { showCardCreationPanel = it },
-                onAddCard = { newCard -> board += newCard },
+                onAddCard = { newCard -> board = board.addCard(newCard) },
                 onBoardChange = {},
                 snackbarHostState = SnackbarHostState(),
             )
@@ -105,7 +105,7 @@ class BoardScreenTest {
                 board = board,
                 showCardCreationPanel = showCardCreationPanel,
                 onShowCardCreationPanelChange = { showCardCreationPanel = it },
-                onAddCard = { newCard -> board += newCard },
+                onAddCard = { newCard -> board = board.addCard(newCard) },
                 onBoardChange = { },
                 snackbarHostState = SnackbarHostState(),
             )
@@ -133,7 +133,7 @@ class BoardScreenTest {
                 board = board,
                 showCardCreationPanel = showCardCreationPanel,
                 onShowCardCreationPanelChange = { showCardCreationPanel = it },
-                onAddCard = { newCard -> board += newCard },
+                onAddCard = { newCard -> board = board.addCard(newCard) },
                 onBoardChange = { },
                 snackbarHostState = snackbarHostState,
             )
