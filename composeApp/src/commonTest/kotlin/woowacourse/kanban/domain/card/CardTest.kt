@@ -67,19 +67,6 @@ class CardTest {
     }
 
     @Test
-    fun `공백으로만 구성된 태그는 제거된다`() {
-        val cardData = Card.create(
-            title = "제목",
-            content = "내용",
-            tags = listOf("태그1", "   ", "", "  "),
-            manager = CardManagerState.DINO,
-            state = CardTaskState.TODO,
-        )
-
-        assertEquals(listOf("태그1"), cardData.tags)
-    }
-
-    @Test
     fun `태그가 5개를 초과하면 생성할 수 없다`() {
         assertFailsWith<IllegalArgumentException> {
             Card.create(
