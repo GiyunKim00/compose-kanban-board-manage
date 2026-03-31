@@ -11,13 +11,13 @@ data class CardFormState(
     val content: String = "",
     val tagInput: String = "",
     val taskState: CardTaskState = CardTaskState.TODO,
-    val managerState: CardManagerState = CardManagerState.DINO,
+    val managerState: CardManagerState? = null,
 ) {
     val titleValidationResult: TitleValidationResult = CardValidator.validateTitle(title)
 
     val tagValidationResult: TagValidationResult = CardValidator.validateTags(tagInput)
 
     val tags: List<String> = CardValidator.parseTags(tagInput)
-
     val isCreateEnabled: Boolean = titleValidationResult.isValid && tagValidationResult.isValid
+    val isManagerRequired: Boolean = taskState != CardTaskState.TODO
 }

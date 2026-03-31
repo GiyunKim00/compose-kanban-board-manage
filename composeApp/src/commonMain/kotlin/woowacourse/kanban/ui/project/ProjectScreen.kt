@@ -95,7 +95,7 @@ private fun sampleProject(): Project {
                         title = "제목3",
                         content = "",
                         tags = listOf("태그1", "태그2"),
-                        manager = CardManagerState.DINO,
+                        manager = null,
                         state = CardTaskState.TODO,
                     ),
                     Card.create(

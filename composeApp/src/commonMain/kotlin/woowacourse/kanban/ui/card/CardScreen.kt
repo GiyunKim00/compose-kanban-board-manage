@@ -82,6 +82,7 @@ fun CardScreen(
         managerState = cardData.managerState,
         taskState = cardData.taskState,
         hasContent = cardData.hasContent(),
+        hasManager = cardData.hasManager(),
         hasTag = cardData.hasTag(),
     )
 }
@@ -102,10 +103,11 @@ fun CardScreen(
     title: String,
     content: String,
     tags: List<String>,
-    managerState: CardManagerState,
+    managerState: CardManagerState?,
     taskState: CardTaskState,
     hasContent: Boolean,
     hasTag: Boolean,
+    hasManager: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -146,19 +148,20 @@ fun CardScreen(
         if (hasTag) CardTagsSection(
             tags = tags,
         )
+        if (hasManager) {
+            HorizontalDivider()
 
-        HorizontalDivider()
-
-        CardAccountInfo(
-            accountName = managerState.toDisplayText(),
-            modifier = Modifier
-                .padding(vertical = 10.dp)
-                .fillMaxWidth()
-                .semantics {
-                    contentDescription = "Kanban Card Account Info"
-                },
-            accountImage = Icons.Default.AccountCircle, /* 추후 api나, Async 등으로 이미지를 불러올 경우 수정할 예정. */
-        )
+            CardAccountInfo(
+                accountName = managerState!!.toDisplayText(),
+                modifier = Modifier
+                    .padding(vertical = 10.dp)
+                    .fillMaxWidth()
+                    .semantics {
+                        contentDescription = "Kanban Card Account Info"
+                    },
+                accountImage = Icons.Default.AccountCircle, /* 추후 api나, Async 등으로 이미지를 불러올 경우 수정할 예정. */
+            )
+        }
     }
 }
 

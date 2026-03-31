@@ -265,7 +265,7 @@ private fun StateButton(
 
 @Composable
 private fun CardCreationPanelManagerSection(
-    selectedManager: CardManagerState,
+    selectedManager: CardManagerState?,
     onManagerChange: (CardManagerState) -> Unit,
 ) {
     Column {

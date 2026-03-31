@@ -13,7 +13,7 @@ class Card private constructor(
     val title: String,
     val content: String,
     val tags: List<String>,
-    val managerState: CardManagerState,
+    val managerState: CardManagerState?,
     val taskState: CardTaskState,
 ) {
     companion object {
@@ -30,7 +30,7 @@ class Card private constructor(
             title: String,
             content: String,
             tags: List<String>,
-            manager: CardManagerState,
+            manager: CardManagerState?,
             state: CardTaskState,
         ): Card {
             require(CardValidator.validateTitle(title).isValid) {
@@ -78,4 +78,6 @@ class Card private constructor(
      * @return 태그가 있다면 true 리턴.
      */
     fun hasTag(): Boolean = tags.isNotEmpty()
+
+    fun hasManager(): Boolean = managerState != null
 }

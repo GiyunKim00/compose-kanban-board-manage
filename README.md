@@ -93,3 +93,4 @@
 ## 리팩토링
 ### 0차
 - Review State 추가
+- ManagerState nullable로 수정
