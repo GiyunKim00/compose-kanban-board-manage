@@ -94,3 +94,4 @@
 ### 0차
 - Review State 추가
 - ManagerState nullable로 수정
+- Board 내 제어로직 추가
