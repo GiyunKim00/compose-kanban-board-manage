@@ -98,6 +98,13 @@ private fun sampleProject(): Project {
                         manager = CardManagerState.DINO,
                         state = CardTaskState.TODO,
                     ),
+                    Card.create(
+                        title = "제목4",
+                        content = "",
+                        tags = listOf("태그1", "태그2"),
+                        manager = CardManagerState.FAMES,
+                        state = CardTaskState.REVIEW,
+                    ),
                 ),
             ),
             Board(

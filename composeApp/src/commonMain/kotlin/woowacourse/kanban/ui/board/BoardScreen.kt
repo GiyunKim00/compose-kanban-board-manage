@@ -61,6 +61,8 @@ import woowacourse.kanban.ui.theme.BoardColor.DoneContentColor
 import woowacourse.kanban.ui.theme.BoardColor.DoneHeaderColor
 import woowacourse.kanban.ui.theme.BoardColor.InProgressContentColor
 import woowacourse.kanban.ui.theme.BoardColor.InProgressHeaderColor
+import woowacourse.kanban.ui.theme.BoardColor.ReviewContentColor
+import woowacourse.kanban.ui.theme.BoardColor.ReviewHeaderColor
 import woowacourse.kanban.ui.theme.BoardColor.TodoContentColor
 import woowacourse.kanban.ui.theme.BoardColor.TodoHeaderColor
 
@@ -294,51 +296,23 @@ private fun BoardContents(
             .padding(24.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        BoardCardColumn(
-            modifier = Modifier
-                .width(320.dp)
-                .height(748.dp),
-            filteredCards = board.cardsByState(CardTaskState.TODO),
-            mode = CardTaskState.TODO,
-            getIsDropTarget = {
-                currentDragPosition?.let { columnBounds[CardTaskState.TODO]?.contains(it) } ?: false
-            },
-            onBoundsChanged = { rect -> columnBounds[CardTaskState.TODO] = rect },
-            onTaskDragStart = { task -> draggedTask = task },
-            onTaskDragChange = { pos -> currentDragPosition = pos },
-            onTaskDragEnd = ::taskEnd,
-            onTaskDragCancel = ::taskDragCancel,
-        )
-        BoardCardColumn(
-            modifier = Modifier
-                .width(320.dp)
-                .height(748.dp),
-            filteredCards = board.cardsByState(CardTaskState.IN_PROGRESS),
-            mode = CardTaskState.IN_PROGRESS,
-            getIsDropTarget = {
-                currentDragPosition?.let { columnBounds[CardTaskState.IN_PROGRESS]?.contains(it) } ?: false
-            },
-            onBoundsChanged = { rect -> columnBounds[CardTaskState.IN_PROGRESS] = rect },
-            onTaskDragStart = { task -> draggedTask = task },
-            onTaskDragChange = { pos -> currentDragPosition = pos },
-            onTaskDragEnd = ::taskEnd,
-            onTaskDragCancel = ::taskDragCancel,
-        )
-        BoardCardColumn(
-            modifier = Modifier
-                .width(320.dp)
-                .height(748.dp),
-            filteredCards = board.cardsByState(CardTaskState.DONE),
-            mode = CardTaskState.DONE,
-            getIsDropTarget = {
-                currentDragPosition?.let { columnBounds[CardTaskState.DONE]?.contains(it) } ?: false
-            },
-            onBoundsChanged = { rect -> columnBounds[CardTaskState.DONE] = rect },
-            onTaskDragStart = { task -> draggedTask = task },
-            onTaskDragChange = { pos -> currentDragPosition = pos },
-            onTaskDragEnd = ::taskEnd,
-            onTaskDragCancel = ::taskDragCancel,
-        )
+        CardTaskState.entries.forEach { state ->
+            BoardCardColumn(
+                modifier = Modifier
+                    .width(320.dp)
+                    .height(748.dp),
+                filteredCards = board.cardsByState(state),
+                mode = state,
+                getIsDropTarget = {
+                    currentDragPosition?.let { columnBounds[state]?.contains(it) } ?: false
+                },
+                onBoundsChanged = { rect -> columnBounds[state] = rect },
+                onTaskDragStart = { task -> draggedTask = task },
+                onTaskDragChange = { pos -> currentDragPosition = pos },
+                onTaskDragEnd = ::taskEnd,
+                onTaskDragCancel = ::taskDragCancel,
+            )
+        }
     }
 }
 
@@ -372,11 +346,13 @@ private fun BoardCardColumn(
     val headerColor = when (mode) {
         CardTaskState.TODO -> TodoHeaderColor
         CardTaskState.IN_PROGRESS -> InProgressHeaderColor
+        CardTaskState.REVIEW -> ReviewHeaderColor
         CardTaskState.DONE -> DoneHeaderColor
     }
     val contentColor = when (mode) {
         CardTaskState.TODO -> TodoContentColor
         CardTaskState.IN_PROGRESS -> InProgressContentColor
+        CardTaskState.REVIEW -> ReviewContentColor
         CardTaskState.DONE -> DoneContentColor
     }
 
@@ -384,6 +360,7 @@ private fun BoardCardColumn(
         modifier = modifier
             .testTag(mode.name)
             .border(1.dp, headerColor, RoundedCornerShape(16.dp))
+            .background(contentColor)
             .clip(RoundedCornerShape(16.dp))
             .onGloballyPositioned {
                 val newBounds = it.boundsInWindow()
@@ -431,7 +408,6 @@ private fun BoardCardColumn(
         }
         LazyColumn(
             modifier = Modifier
-                .background(contentColor)
                 .padding(horizontal = 17.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {

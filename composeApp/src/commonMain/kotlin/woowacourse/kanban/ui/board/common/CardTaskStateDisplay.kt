@@ -6,6 +6,7 @@ fun CardTaskState.toDisplayText(): String {
     return when (this) {
         CardTaskState.TODO -> "To Do"
         CardTaskState.IN_PROGRESS -> "In Progress"
+        CardTaskState.REVIEW -> "Review"
         CardTaskState.DONE -> "Done"
     }
 }
