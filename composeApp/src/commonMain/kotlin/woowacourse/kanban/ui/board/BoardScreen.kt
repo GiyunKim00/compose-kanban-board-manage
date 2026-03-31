@@ -55,7 +55,7 @@ import woowacourse.kanban.domain.card.Card
 import woowacourse.kanban.domain.card.CardManagerState
 import woowacourse.kanban.domain.card.CardTaskState
 import woowacourse.kanban.ui.board.common.toDisplayText
-import woowacourse.kanban.ui.card.CardCreationScreen
+import woowacourse.kanban.ui.card.CardEditorDialog
 import woowacourse.kanban.ui.card.CardScreen
 import woowacourse.kanban.ui.theme.BoardColor.DoneContentColor
 import woowacourse.kanban.ui.theme.BoardColor.DoneHeaderColor
@@ -143,7 +143,7 @@ internal fun BoardScreenContents(
             }
 
             if (showCardCreationPanel) {
-                CardCreationScreen(
+                CardEditorDialog(
                     onAddItem = { newCard ->
                         onAddCard(newCard)
                         onShowCardCreationPanelChange(false)

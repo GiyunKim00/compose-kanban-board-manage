@@ -54,7 +54,7 @@ import woowacourse.kanban.ui.theme.KanbanCardColor.SelectedContent
 import woowacourse.kanban.ui.theme.Typography.CardCreationTitle
 
 @Composable
-fun CardCreationScreen(
+fun CardEditorDialog(
     modifier: Modifier = Modifier,
     onAddItem: (Card) -> Unit,
     onDismiss: () -> Unit,
@@ -64,7 +64,7 @@ fun CardCreationScreen(
     Dialog(
         onDismissRequest = onDismiss,
     ) {
-        CardCreationScreenContents(
+        CardEditorDialogContents(
             modifier = modifier,
             cardFormState = cardFormState,
             onCardFormStateChange = { cardFormState = it },
@@ -75,7 +75,7 @@ fun CardCreationScreen(
 }
 
 @Composable
-internal fun CardCreationScreenContents(
+internal fun CardEditorDialogContents(
     modifier: Modifier = Modifier,
     cardFormState: CardFormState,
     onCardFormStateChange: (CardFormState) -> Unit,
@@ -369,8 +369,8 @@ private fun PanelButtonSection(
 
 @Preview(widthDp = 672, heightDp = 909)
 @Composable
-fun CardCreationScreenPreview() {
-    CardCreationScreen(
+fun CardEditorDialogPreview() {
+    CardEditorDialog(
         onAddItem = {},
         onDismiss = {},
     )
