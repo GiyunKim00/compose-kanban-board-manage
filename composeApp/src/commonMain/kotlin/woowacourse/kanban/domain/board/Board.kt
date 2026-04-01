@@ -29,20 +29,59 @@ data class Board(
 
     fun addCard(card: Card): Board = copy(cards = cards + card)
 
-    /**
-     * Card의 상태를 변경합니다. Card Class의 updateWithNewState 메서드를 활용합니다.
-     * @param cardId 변경할 카드의 ID입니다.
-     */
-    fun moveCard(cardId: String, targetState: CardTaskState): Board =
+    fun moveCard(card: Card, targetState: CardTaskState): BoardManageResult {
+        val state = validateTransition(
+            card = card,
+            targetState = targetState,
+            targetManager = card.managerState,
+        )
+
+        if (state != BoardManageState.SUCCESS) {
+            return BoardManageResult(this, state)
+        }
+
+        val updatedBoard = updatedBoardWithNewCard(card.updateWithNewState(targetState))
+
+        return BoardManageResult(updatedBoard, BoardManageState.SUCCESS)
+    }
+
+    fun deleteCard(card: Card): BoardManageResult {
+        if (!validateDelete(card)) {
+            return BoardManageResult(this, BoardManageState.INVALID_DELETE)
+        }
+
+        val updatedBoard = copy(
+            cards = cards.filterNot { it.id == card.id },
+        )
+
+        return BoardManageResult(updatedBoard, BoardManageState.SUCCESS)
+    }
+
+    fun updateCard(card:Card): BoardManageResult {
+
+        val state = validateTransition(
+            card = card,
+            targetState = card.taskState,
+            targetManager = card.managerState,
+        )
+
+        if (state != BoardManageState.SUCCESS) {
+            return BoardManageResult(this, state)
+        }
+
+        val updatedBoard = updatedBoardWithNewCard(card)
+        return BoardManageResult(updatedBoard, BoardManageState.SUCCESS)
+    }
+
+    private fun updatedBoardWithNewCard(updatedCard: Card): Board =
         copy(
             cards = cards.map { card ->
-                if (card.id == cardId) card.updateWithNewState(targetState)
-                else card
+                if (card.id == updatedCard.id) updatedCard else card
             },
         )
 }
 
-private fun validate(
+private fun validateTransition(
     card: Card,
     targetState: CardTaskState,
     targetManager: CardManagerState?,
@@ -71,10 +110,8 @@ private fun validate(
 
     if (!isValidTransition) return BoardManageState.INVALID_TRANSITION
 
-
     if (targetState != CardTaskState.TODO && targetManager == null)
         return BoardManageState.MANAGER_REQUIRED
-
 
     return BoardManageState.SUCCESS
 }

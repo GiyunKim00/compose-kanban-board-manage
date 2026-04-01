@@ -7,7 +7,7 @@ enum class BoardManageState {
     INVALID_TRANSITION,
 }
 
-data class BoardMutationResult(
+data class BoardManageResult(
     val board: Board,
     val status: BoardManageState
 ) {
