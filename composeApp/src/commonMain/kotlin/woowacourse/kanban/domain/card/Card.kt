@@ -52,8 +52,29 @@ class Card private constructor(
                 taskState = state,
             )
         }
-    }
 
+        fun update(
+            id: String,
+            title: String,
+            content: String,
+            tags: List<String>,
+            manager: CardManagerState?,
+            state: CardTaskState,
+        ): Card {
+            require(CardValidator.validateTitle(title).isValid)
+            require(CardValidator.validateTags(tags).isValid)
+
+            val normalizedTags = CardValidator.normalizeTags(tags)
+            return Card(
+                id = id,
+                title = title,
+                content = content,
+                tags = normalizedTags,
+                managerState = manager,
+                taskState = state,
+            )
+        }
+    }
     fun updateWithNewState(
         newState: CardTaskState,
     ): Card {

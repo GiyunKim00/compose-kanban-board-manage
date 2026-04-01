@@ -95,3 +95,4 @@
 - Review State 추가
 - ManagerState nullable로 수정
 - Board 내 제어로직 추가
+- Card 내 업데이트 로직 추가
