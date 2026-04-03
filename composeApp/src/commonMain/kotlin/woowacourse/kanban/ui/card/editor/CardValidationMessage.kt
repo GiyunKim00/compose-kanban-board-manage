@@ -1,4 +1,4 @@
-package woowacourse.kanban.ui.card.creation
+package woowacourse.kanban.ui.card.editor
 
 import woowacourse.kanban.domain.card.TagValidationResult
 import woowacourse.kanban.domain.card.TitleValidationResult

@@ -1,4 +1,4 @@
-package woowacourse.kanban.ui.card.creation
+package woowacourse.kanban.ui.card.editor
 
 import woowacourse.kanban.domain.card.CardManagerState
 import woowacourse.kanban.domain.card.CardTaskState
@@ -6,7 +6,7 @@ import woowacourse.kanban.domain.card.CardValidator
 import woowacourse.kanban.domain.card.TagValidationResult
 import woowacourse.kanban.domain.card.TitleValidationResult
 
-data class CardFormState(
+data class CardEditorState(
     val title: String = "",
     val content: String = "",
     val tagInput: String = "",
@@ -18,6 +18,11 @@ data class CardFormState(
     val tagValidationResult: TagValidationResult = CardValidator.validateTags(tagInput)
 
     val tags: List<String> = CardValidator.parseTags(tagInput)
-    val isCreateEnabled: Boolean = titleValidationResult.isValid && tagValidationResult.isValid
     val isManagerRequired: Boolean = taskState != CardTaskState.TODO
+
+    val isManagerValid: Boolean = !isManagerRequired || managerState != null
+
+    val isSubmitEnabled: Boolean = titleValidationResult.isValid &&
+            tagValidationResult.isValid &&
+            isManagerValid
 }

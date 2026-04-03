@@ -61,6 +61,6 @@ private fun CardPreview(
 ) {
     CardScreen(
         modifier = Modifier.width(286.dp),
-        cardData = cardData,
+        card = cardData,
     )
 }

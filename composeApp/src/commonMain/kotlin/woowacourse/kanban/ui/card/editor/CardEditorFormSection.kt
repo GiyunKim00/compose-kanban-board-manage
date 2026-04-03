@@ -1,4 +1,4 @@
-package woowacourse.kanban.ui.card.creation
+package woowacourse.kanban.ui.card.editor
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -23,7 +23,7 @@ import woowacourse.kanban.ui.theme.KanbanCardColor.ErrorColor
 import woowacourse.kanban.ui.theme.Typography.CardCreationTitle
 
 @Composable
-fun CardCreationPanelFormSection(
+fun CardEditorFormSection(
     title: String,
     contents: String,
     modifier: Modifier = Modifier,

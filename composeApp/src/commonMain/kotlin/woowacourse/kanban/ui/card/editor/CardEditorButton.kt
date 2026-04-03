@@ -1,4 +1,4 @@
-package woowacourse.kanban.ui.card.creation
+package woowacourse.kanban.ui.card.editor
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun PanelButton(
+fun CardEditorButton(
     text: String,
     contentColor: Color,
     containerColor: Color,
@@ -49,23 +49,23 @@ fun PanelButton(
 
 @Preview(showBackground = true)
 @Composable
-private fun EnabledPanelButtonPreview() {
+private fun EnabledCardEditorButtonPreview() {
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        PanelButton(
+        CardEditorButton(
             text = "생성",
-            contentColor = PanelButtonDefaultSetting.CreateContentColor,
-            containerColor = PanelButtonDefaultSetting.CreateContainerColor,
-            elevation = PanelButtonDefaultSetting.CreateElevation,
+            contentColor = CardEditorButtonDefaultSetting.SubmitContentColor,
+            containerColor = CardEditorButtonDefaultSetting.SubmitContainerColor,
+            elevation = CardEditorButtonDefaultSetting.SubmitElevation,
             enabled = true,
         )
 
-        PanelButton(
+        CardEditorButton(
             text = "취소",
-            contentColor = PanelButtonDefaultSetting.CancelContentColor,
-            containerColor = PanelButtonDefaultSetting.CancelContainerColor,
-            elevation = PanelButtonDefaultSetting.CancelElevation,
+            contentColor = CardEditorButtonDefaultSetting.CancelContentColor,
+            containerColor = CardEditorButtonDefaultSetting.CancelContainerColor,
+            elevation = CardEditorButtonDefaultSetting.CancelElevation,
             enabled = true,
         )
     }
@@ -73,12 +73,12 @@ private fun EnabledPanelButtonPreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun DisabledPanelButtonPreview() {
-    PanelButton(
+private fun DisabledCardEditorButtonPreview() {
+    CardEditorButton(
         text = "생성",
-        contentColor = PanelButtonDefaultSetting.CreateContentColor,
-        containerColor = PanelButtonDefaultSetting.CreateContainerColor,
-        elevation = PanelButtonDefaultSetting.CreateElevation,
+        contentColor = CardEditorButtonDefaultSetting.SubmitContentColor,
+        containerColor = CardEditorButtonDefaultSetting.SubmitContainerColor,
+        elevation = CardEditorButtonDefaultSetting.SubmitElevation,
         enabled = false,
     )
 }

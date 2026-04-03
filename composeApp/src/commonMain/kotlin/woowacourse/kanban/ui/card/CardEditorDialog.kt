@@ -23,10 +23,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,17 +32,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import woowacourse.kanban.domain.card.Card
 import woowacourse.kanban.domain.card.CardManagerState
 import woowacourse.kanban.domain.card.CardTaskState
 import woowacourse.kanban.domain.card.TagValidationResult
 import woowacourse.kanban.domain.card.TitleValidationResult
 import woowacourse.kanban.ui.board.common.toDisplayText
-import woowacourse.kanban.ui.card.creation.CardCreationPanelFormSection
-import woowacourse.kanban.ui.card.creation.CardFormState
-import woowacourse.kanban.ui.card.creation.PanelButton
-import woowacourse.kanban.ui.card.creation.PanelButtonDefaultSetting
-import woowacourse.kanban.ui.card.creation.message
+import woowacourse.kanban.ui.card.editor.CardEditorButton
+import woowacourse.kanban.ui.card.editor.CardEditorButtonDefaultSetting
+import woowacourse.kanban.ui.card.editor.CardEditorFormSection
+import woowacourse.kanban.ui.card.editor.CardEditorMode
+import woowacourse.kanban.ui.card.editor.CardEditorState
+import woowacourse.kanban.ui.card.editor.message
 import woowacourse.kanban.ui.theme.KanbanCardColor.DefaultBackground
 import woowacourse.kanban.ui.theme.KanbanCardColor.DefaultContent
 import woowacourse.kanban.ui.theme.KanbanCardColor.SelectedBackground
@@ -55,20 +51,24 @@ import woowacourse.kanban.ui.theme.Typography.CardCreationTitle
 
 @Composable
 fun CardEditorDialog(
+    mode: CardEditorMode,
+    cardEditorState: CardEditorState,
+    onCardEditorStateChange: (CardEditorState) -> Unit,
     modifier: Modifier = Modifier,
-    onAddItem: (Card) -> Unit,
+    onSubmit: (CardEditorState) -> Unit,
+    onDelete: (() -> Unit)? = null,
     onDismiss: () -> Unit,
 ) {
-    var cardFormState by remember { mutableStateOf(CardFormState()) }
-
     Dialog(
         onDismissRequest = onDismiss,
     ) {
         CardEditorDialogContents(
+            mode = mode,
             modifier = modifier,
-            cardFormState = cardFormState,
-            onCardFormStateChange = { cardFormState = it },
-            onAddItem = onAddItem,
+            cardEditorState = cardEditorState,
+            onCardEditorStateChange = onCardEditorStateChange,
+            onSubmit = onSubmit,
+            onDelete = onDelete,
             onDismiss = onDismiss,
         )
     }
@@ -76,22 +76,25 @@ fun CardEditorDialog(
 
 @Composable
 internal fun CardEditorDialogContents(
+    mode: CardEditorMode,
     modifier: Modifier = Modifier,
-    cardFormState: CardFormState,
-    onCardFormStateChange: (CardFormState) -> Unit,
-    onAddItem: (Card) -> Unit,
+    cardEditorState: CardEditorState,
+    onCardEditorStateChange: (CardEditorState) -> Unit,
+    onSubmit: (CardEditorState) -> Unit,
+    onDelete: (() -> Unit)?,
     onDismiss: () -> Unit,
 ) {
-    val titleValidationResult = cardFormState.titleValidationResult
-    val tagValidationResult = cardFormState.tagValidationResult
+    val titleValidationResult = cardEditorState.titleValidationResult
+    val tagValidationResult = cardEditorState.tagValidationResult
 
     OutlinedCard(
-        modifier = modifier.testTag("생성 모달 열림"),
+        modifier = modifier.testTag("모달 열림"),
     ) {
         Column(
             modifier = Modifier.background(DefaultBackground).width(672.dp),
         ) {
-            CardCreationPanelHeaderSection(
+            CardHeaderSection(
+                mode = mode,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 28.dp, horizontal = 24.dp),
@@ -104,12 +107,12 @@ internal fun CardEditorDialogContents(
                 modifier = Modifier.padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp),
             ) {
-                CardCreationPanelFormSection(
+                CardEditorFormSection(
                     title = "제목 *",
                     placeholder = "태스크 제목을 입력하세요",
-                    contents = cardFormState.title,
+                    contents = cardEditorState.title,
                     onTextChange = {
-                        onCardFormStateChange(cardFormState.copy(title = it))
+                        onCardEditorStateChange(cardEditorState.copy(title = it))
                     },
                     showAdditionalInfo = titleValidationResult !is TitleValidationResult.Valid,
                     testTag = "titleTextField",
@@ -117,22 +120,22 @@ internal fun CardEditorDialogContents(
                     isError = titleValidationResult !is TitleValidationResult.Valid,
                 )
 
-                CardCreationPanelFormSection(
+                CardEditorFormSection(
                     title = "설명",
                     placeholder = "태스크에 대한 자세한 설명을 입력하세요",
-                    contents = cardFormState.content,
+                    contents = cardEditorState.content,
                     onTextChange = {
-                        onCardFormStateChange(cardFormState.copy(content = it))
+                        onCardEditorStateChange(cardEditorState.copy(content = it))
                     },
                     testTag = "descriptionTextField",
                 )
 
-                CardCreationPanelFormSection(
+                CardEditorFormSection(
                     title = "태그",
                     placeholder = "태그를 쉼표로 구분하여 입력하세요 (예: 버그, 긴급)",
-                    contents = cardFormState.tagInput,
+                    contents = cardEditorState.tagInput,
                     onTextChange = {
-                        onCardFormStateChange(cardFormState.copy(tagInput = it))
+                        onCardEditorStateChange(cardEditorState.copy(tagInput = it))
                     },
                     showAdditionalInfo = true,
                     testTag = "tagTextField",
@@ -140,36 +143,29 @@ internal fun CardEditorDialogContents(
                     isError = tagValidationResult !is TagValidationResult.Valid,
                 )
 
-                CardCreationPanelStateSection(
-                    selectedState = cardFormState.taskState,
+                CardStateSection(
+                    selectedState = cardEditorState.taskState,
                     onStateChange = {
-                        onCardFormStateChange(cardFormState.copy(taskState = it))
+                        onCardEditorStateChange(cardEditorState.copy(taskState = it))
                     },
                 )
 
-                CardCreationPanelManagerSection(
-                    selectedManager = cardFormState.managerState,
+                CardManagerSection(
+                    selectedState = cardEditorState.taskState,
+                    selectedManager = cardEditorState.managerState,
                     onManagerChange = {
-                        onCardFormStateChange(cardFormState.copy(managerState = it))
+                        onCardEditorStateChange(cardEditorState.copy(managerState = it))
                     },
                 )
 
                 HorizontalDivider(modifier = Modifier.fillMaxWidth())
 
-                PanelButtonSection(
-                    createEnabled = cardFormState.isCreateEnabled,
+                CardEditorButtonSection(
+                    mode = mode,
+                    submitEnabled = cardEditorState.isSubmitEnabled,
                     onCancelClick = onDismiss,
-                    onCreateClick = {
-                        onAddItem(
-                            Card.create(
-                                title = cardFormState.title,
-                                content = cardFormState.content,
-                                tags = cardFormState.tags,
-                                manager = cardFormState.managerState,
-                                state = cardFormState.taskState,
-                            ),
-                        )
-                    },
+                    onSubmitClick = { onSubmit(cardEditorState) },
+                    onDeleteClick = onDelete,
                 )
             }
         }
@@ -177,16 +173,21 @@ internal fun CardEditorDialogContents(
 }
 
 @Composable
-private fun CardCreationPanelHeaderSection(
+private fun CardHeaderSection(
+    mode: CardEditorMode,
     modifier: Modifier,
     onClose: () -> Unit,
 ) {
+    val title = when (mode) {
+        CardEditorMode.ADD -> "새 태스크 생성"
+        CardEditorMode.EDIT -> "기존 태스크 수정"
+    }
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "새 태스크 생성",
+            text = title,
             fontSize = 20.sp,
             fontWeight = FontWeight.W600,
             lineHeight = 28.sp,
@@ -204,7 +205,7 @@ private fun CardCreationPanelHeaderSection(
 }
 
 @Composable
-private fun CardCreationPanelStateSection(
+private fun CardStateSection(
     selectedState: CardTaskState,
     onStateChange: (CardTaskState) -> Unit,
 ) {
@@ -224,7 +225,7 @@ private fun CardCreationPanelStateSection(
                     isSelected = selectedState == state,
                     onClick = { onStateChange(state) },
                     modifier = Modifier
-                        .width(200.dp)
+                        .weight(1f)
                         .height(52.dp),
                 )
             }
@@ -264,26 +265,39 @@ private fun StateButton(
 }
 
 @Composable
-private fun CardCreationPanelManagerSection(
+private fun CardManagerSection(
+    selectedState: CardTaskState,
     selectedManager: CardManagerState?,
-    onManagerChange: (CardManagerState) -> Unit,
+    onManagerChange: (CardManagerState?) -> Unit,
 ) {
     Column {
         Text(
-            text = "담당자 *",
+            text = if (selectedState != CardTaskState.TODO) "담당자 *" else "담당자",
             style = CardCreationTitle,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            if (selectedState == CardTaskState.TODO) {
+                ManagerButton(
+                    text = "없음",
+                    iconEnable = false,
+                    isSelected = selectedManager == null,
+                    onClick = { onManagerChange(null) },
+                    modifier = Modifier
+                        .width(72.dp)
+                        .height(68.dp),
+                )
+            }
             CardManagerState.entries.forEach { manager ->
                 ManagerButton(
                     text = manager.toDisplayText(),
+                    iconEnable = true,
                     isSelected = selectedManager == manager,
                     onClick = { onManagerChange(manager) },
                     modifier = Modifier
-                        .width(200.dp)
+                        .weight(1f)
                         .height(68.dp),
                 )
             }
@@ -294,6 +308,7 @@ private fun CardCreationPanelManagerSection(
 @Composable
 private fun ManagerButton(
     text: String,
+    iconEnable: Boolean,
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -317,13 +332,15 @@ private fun ManagerButton(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                imageVector = Icons.Default.AccountCircle,
-                contentDescription = "매니저 아이콘",
-                modifier = Modifier.size(24.dp),
-                tint = Color(0xFF838383),
-            )
-            Spacer(modifier = Modifier.width(12.dp))
+            if (iconEnable) {
+                Icon(
+                    imageVector = Icons.Default.AccountCircle,
+                    contentDescription = "매니저 아이콘",
+                    modifier = Modifier.size(24.dp),
+                    tint = Color(0xFF838383),
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+            }
             Text(
                 text = text,
                 fontSize = 14.sp,
@@ -336,33 +353,48 @@ private fun ManagerButton(
 }
 
 @Composable
-private fun PanelButtonSection(
-    createEnabled: Boolean,
+private fun CardEditorButtonSection(
+    mode: CardEditorMode,
+    submitEnabled: Boolean,
     modifier: Modifier = Modifier,
     onCancelClick: () -> Unit,
-    onCreateClick: () -> Unit,
+    onSubmitClick: () -> Unit,
+    onDeleteClick: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        PanelButton(
+        CardEditorButton(
             text = "취소",
-            contentColor = PanelButtonDefaultSetting.CancelContentColor,
-            containerColor = PanelButtonDefaultSetting.CancelContainerColor,
-            elevation = PanelButtonDefaultSetting.CancelElevation,
+            contentColor = CardEditorButtonDefaultSetting.CancelContentColor,
+            containerColor = CardEditorButtonDefaultSetting.CancelContainerColor,
+            elevation = CardEditorButtonDefaultSetting.CancelElevation,
             enabled = true,
             onClick = onCancelClick,
         )
+
         Spacer(modifier = Modifier.width(12.dp))
-        PanelButton(
-            text = "생성",
-            contentColor = PanelButtonDefaultSetting.CreateContentColor,
-            containerColor = PanelButtonDefaultSetting.CreateContainerColor,
-            elevation = PanelButtonDefaultSetting.CreateElevation,
-            enabled = createEnabled,
-            onClick = onCreateClick,
+
+        if (mode == CardEditorMode.EDIT) {
+            CardEditorButton(
+                text = "삭제",
+                contentColor = CardEditorButtonDefaultSetting.DeleteContentColor,
+                containerColor = CardEditorButtonDefaultSetting.DeleteContainerColor,
+                elevation = CardEditorButtonDefaultSetting.DeleteElevation,
+                enabled = true,
+                onClick = { onDeleteClick?.invoke() },
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+        }
+        CardEditorButton(
+            text = if (mode == CardEditorMode.ADD) "생성" else "수정",
+            contentColor = CardEditorButtonDefaultSetting.SubmitContentColor,
+            containerColor = CardEditorButtonDefaultSetting.SubmitContainerColor,
+            elevation = CardEditorButtonDefaultSetting.SubmitElevation,
+            enabled = submitEnabled,
+            onClick = onSubmitClick,
         )
     }
 }
@@ -371,7 +403,10 @@ private fun PanelButtonSection(
 @Composable
 fun CardEditorDialogPreview() {
     CardEditorDialog(
-        onAddItem = {},
+        mode = CardEditorMode.ADD,
+        cardEditorState = CardEditorState(),
+        onCardEditorStateChange = {},
+        onSubmit = {},
         onDismiss = {},
     )
 }
