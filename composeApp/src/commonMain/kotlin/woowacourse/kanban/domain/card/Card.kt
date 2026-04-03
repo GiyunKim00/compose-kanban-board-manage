@@ -33,23 +33,13 @@ class Card private constructor(
             manager: CardManagerState?,
             state: CardTaskState,
         ): Card {
-            require(CardValidator.validateTitle(title).isValid) {
-                "[Card] 제목은 필수 입력 항목입니다."
-            }
-
-            require(CardValidator.validateTags(tags).isValid) {
-                "[Card] 태그 형식이 올바르지 않습니다."
-            }
-
-            val normalizedTags = CardValidator.normalizeTags(tags)
-
-            return Card(
+            return createDefaultCard(
                 id = generateId(),
-                title = title.trim(),
+                title = title,
                 content = content,
-                tags = normalizedTags,
-                managerState = manager,
-                taskState = state,
+                tags = tags,
+                manager = manager,
+                state = state,
             )
         }
 
@@ -61,13 +51,38 @@ class Card private constructor(
             manager: CardManagerState?,
             state: CardTaskState,
         ): Card {
-            require(CardValidator.validateTitle(title).isValid)
-            require(CardValidator.validateTags(tags).isValid)
-
-            val normalizedTags = CardValidator.normalizeTags(tags)
-            return Card(
+            return createDefaultCard(
                 id = id,
                 title = title,
+                content = content,
+                tags = tags,
+                manager = manager,
+                state = state,
+            )
+        }
+
+        private fun createDefaultCard(
+            id: String,
+            title: String,
+            content: String,
+            tags: List<String>,
+            manager: CardManagerState?,
+            state: CardTaskState,
+        ): Card {
+            require(CardValidator.validateTitle(title).isValid) {
+                "[Card] 제목은 필수 입력 항목입니다."
+            }
+
+            require(CardValidator.validateTags(tags).isValid) {
+                "[Card] 태그 형식이 올바르지 않습니다."
+            }
+
+            val normalizedTitle = title.trim()
+            val normalizedTags = CardValidator.normalizeTags(tags)
+
+            return Card(
+                id = id,
+                title = normalizedTitle,
                 content = content,
                 tags = normalizedTags,
                 managerState = manager,
