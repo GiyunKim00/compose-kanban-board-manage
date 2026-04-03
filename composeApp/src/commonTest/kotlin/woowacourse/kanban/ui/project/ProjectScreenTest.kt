@@ -51,7 +51,6 @@ class ProjectScreenTest {
                         ),
                     ),
                 ),
-                onAddCard = {},
                 onBoardChange = {},
             )
         }

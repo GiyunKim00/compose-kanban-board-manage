@@ -1,15 +1,19 @@
 package woowacourse.kanban.ui.card
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.runComposeUiTest
-import woowacourse.kanban.domain.card.TagValidationResult
-import woowacourse.kanban.ui.card.creation.message
+import woowacourse.kanban.ui.card.editor.CardEditorMode
+import woowacourse.kanban.ui.card.editor.CardEditorState
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 @OptIn(ExperimentalTestApi::class)
 class CardEditorDialogTest {
@@ -18,7 +22,11 @@ class CardEditorDialogTest {
         //when
         setContent {
             CardEditorDialog(
-                onAddItem = {},
+                mode = CardEditorMode.ADD,
+                cardEditorState = CardEditorState(),
+                onCardEditorStateChange = {},
+                onSubmit = {},
+                onDelete = {},
                 onDismiss = {},
             )
         }
@@ -29,7 +37,7 @@ class CardEditorDialogTest {
         onNodeWithText("설명").assertExists()
         onNodeWithText("태그").assertExists()
         onNodeWithText("상태 *").assertExists()
-        onNodeWithText("담당자 *").assertExists()
+        onNodeWithText("담당자").assertExists()
         onNodeWithText("생성").assertIsNotEnabled()
     }
 
@@ -39,7 +47,11 @@ class CardEditorDialogTest {
         //when
         setContent {
             CardEditorDialog(
-                onAddItem = {},
+                mode = CardEditorMode.ADD,
+                cardEditorState = CardEditorState(),
+                onCardEditorStateChange = {},
+                onSubmit = {},
+                onDelete = {},
                 onDismiss = {},
             )
         }
@@ -55,7 +67,11 @@ class CardEditorDialogTest {
         //when
         setContent {
             CardEditorDialog(
-                onAddItem = {},
+                mode = CardEditorMode.ADD,
+                cardEditorState = CardEditorState(),
+                onCardEditorStateChange = {},
+                onSubmit = {},
+                onDelete = {},
                 onDismiss = {},
             )
         }
@@ -68,8 +84,13 @@ class CardEditorDialogTest {
     fun `제목을 입력하면 제목 에러메시지가 사라진다`() = runComposeUiTest {
         //when
         setContent {
+            var cardEditorState by remember { mutableStateOf(CardEditorState()) }
             CardEditorDialog(
-                onAddItem = {},
+                mode = CardEditorMode.ADD,
+                cardEditorState = cardEditorState,
+                onCardEditorStateChange = { cardEditorState = it },
+                onSubmit = {},
+                onDelete = {},
                 onDismiss = {},
             )
         }
@@ -85,7 +106,11 @@ class CardEditorDialogTest {
         //when
         setContent {
             CardEditorDialog(
-                onAddItem = {},
+                mode = CardEditorMode.ADD,
+                cardEditorState = CardEditorState(),
+                onCardEditorStateChange = {},
+                onSubmit = {},
+                onDelete = {},
                 onDismiss = {},
             )
         }
@@ -98,16 +123,22 @@ class CardEditorDialogTest {
     }
 
     @Test
-    fun `InvalidBlankTag는 정의된 메시지를 리턴한다`() {
-        val message = TagValidationResult.InvalidBlankTag.message()
+    fun `선택된 상태에 따라 담당자 없음 버튼 노출 여부가 변경된다`() = runComposeUiTest {
+        setContent {
+            var cardEditorState by remember { mutableStateOf(CardEditorState()) }
 
-        assertEquals("빈 태그는 입력할 수 없습니다.", message)
-    }
+            CardEditorDialog(
+                mode = CardEditorMode.ADD,
+                cardEditorState = cardEditorState,
+                onCardEditorStateChange = { cardEditorState = it },
+                onSubmit = {},
+                onDelete = {},
+                onDismiss = {},
+            )
+        }
 
-    @Test
-    fun `TooManyTags는 정의된 메시지를 리턴한다`() {
-        val message = TagValidationResult.TooManyTags.message()
-
-        assertEquals("태그는 최대 5개까지 입력할 수 있습니다.", message)
+        onNodeWithText("없음").assertExists()
+        onNodeWithTag("In Progress").performClick()
+        onNodeWithText("없음").assertDoesNotExist()
     }
 }

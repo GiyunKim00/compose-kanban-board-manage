@@ -5,7 +5,10 @@ import org.assertj.core.api.Assertions.assertThat
 import woowacourse.kanban.domain.card.Card
 import woowacourse.kanban.domain.card.CardManagerState
 import woowacourse.kanban.domain.card.CardTaskState
+import woowacourse.kanban.domain.card.TagValidationResult
+import woowacourse.kanban.ui.card.editor.message
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BoardTest {
@@ -513,5 +516,19 @@ class BoardTest {
         assertThat(result.board.totalTaskCount).isEqualTo(1)
         assertThat(result.board.toDoTaskCount).isEqualTo(0)
         assertThat(result.board.doneTaskCount).isEqualTo(1)
+    }
+
+    @Test
+    fun `InvalidBlankTag는 정의된 메시지를 리턴한다`() {
+        val message = TagValidationResult.InvalidBlankTag.message()
+
+        assertEquals("빈 태그는 입력할 수 없습니다.", message)
+    }
+
+    @Test
+    fun `TooManyTags는 정의된 메시지를 리턴한다`() {
+        val message = TagValidationResult.TooManyTags.message()
+
+        assertEquals("태그는 최대 5개까지 입력할 수 있습니다.", message)
     }
 }
