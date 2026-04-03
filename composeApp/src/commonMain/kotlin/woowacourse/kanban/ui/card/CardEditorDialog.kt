@@ -91,7 +91,7 @@ internal fun CardEditorDialogContents(
         modifier = modifier.testTag("모달 열림"),
     ) {
         Column(
-            modifier = Modifier.background(DefaultBackground).width(672.dp),
+            modifier = Modifier.background(DefaultBackground),
         ) {
             CardHeaderSection(
                 mode = mode,
@@ -256,7 +256,7 @@ private fun StateButton(
     ) {
         Text(
             text = text,
-            fontSize = 16.sp,
+            fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
             letterSpacing = (-0.3).sp,
             lineHeight = 24.sp,
@@ -343,7 +343,7 @@ private fun ManagerButton(
             }
             Text(
                 text = text,
-                fontSize = 14.sp,
+                fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
                 letterSpacing = (-0.15).sp,
                 lineHeight = 20.sp,
