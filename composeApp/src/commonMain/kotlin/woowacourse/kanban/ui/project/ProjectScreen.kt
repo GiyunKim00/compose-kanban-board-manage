@@ -27,11 +27,6 @@ fun ProjectScreen() {
         onBoardSelected = { boardIndex ->
             project = project.switchBoard(boardIndex)
         },
-        onAddNewCard = { card ->
-            project = project.updateBoard(
-                project.boards[project.selectedBoardIndex].addCard(card),
-            )
-        },
         onBoardChange = { board ->
             project = project.updateBoard(board)
         },
@@ -51,7 +46,6 @@ internal fun ProjectScreenContents(
     project: Project,
     modifier: Modifier = Modifier,
     onBoardSelected: (Int) -> Unit = {},
-    onAddNewCard: (Card) -> Unit = {},
     onBoardChange: (Board) -> Unit = {},
 ) {
     Row(
@@ -63,7 +57,6 @@ internal fun ProjectScreenContents(
         )
         BoardScreen(
             board = project.boards[project.selectedBoardIndex],
-            onAddCard = onAddNewCard,
             onBoardChange = onBoardChange,
         )
     }
