@@ -29,47 +29,53 @@ data class Board(
 
     fun addCard(card: Card): Board = copy(cards = cards + card)
 
-    fun moveCard(card: Card, targetState: CardTaskState): BoardManageResult {
+    fun moveCard(cardId: String, targetState: CardTaskState): BoardManageResult {
+        val originalCard = cards.first { it.id == cardId }
+
         val state = validateTransition(
-            card = card,
+            card = originalCard,
             targetState = targetState,
-            targetManager = card.managerState,
+            targetManager = originalCard.managerState,
         )
 
         if (state != BoardManageState.SUCCESS) {
             return BoardManageResult(this, state)
         }
 
-        val updatedBoard = updatedBoardWithNewCard(card.updateWithNewState(targetState))
+        val updatedBoard = updatedBoardWithNewCard(
+            originalCard.updateWithNewState(targetState)
+        )
 
         return BoardManageResult(updatedBoard, BoardManageState.SUCCESS)
     }
 
-    fun deleteCard(card: Card): BoardManageResult {
-        if (!validateDelete(card)) {
+    fun deleteCard(cardId: String): BoardManageResult {
+        val targetCard = cards.first { it.id == cardId }
+        if (!validateDelete(targetCard)) {
             return BoardManageResult(this, BoardManageState.INVALID_DELETE)
         }
 
         val updatedBoard = copy(
-            cards = cards.filterNot { it.id == card.id },
+            cards = cards.filterNot { it.id == cardId },
         )
 
         return BoardManageResult(updatedBoard, BoardManageState.SUCCESS)
     }
 
-    fun updateCard(card:Card): BoardManageResult {
+    fun updateCard(targetCard:Card): BoardManageResult {
+        val originalCard = cards.first { it.id == targetCard.id }
 
         val state = validateTransition(
-            card = card,
-            targetState = card.taskState,
-            targetManager = card.managerState,
+            card = originalCard,
+            targetState = targetCard.taskState,
+            targetManager = targetCard.managerState,
         )
 
         if (state != BoardManageState.SUCCESS) {
             return BoardManageResult(this, state)
         }
 
-        val updatedBoard = updatedBoardWithNewCard(card)
+        val updatedBoard = updatedBoardWithNewCard(targetCard)
         return BoardManageResult(updatedBoard, BoardManageState.SUCCESS)
     }
 
