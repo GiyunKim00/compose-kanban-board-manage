@@ -2,6 +2,7 @@ package woowacourse.kanban.ui.board
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +34,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,12 +53,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import woowacourse.kanban.domain.board.Board
+import woowacourse.kanban.domain.board.BoardManageResult
+import woowacourse.kanban.domain.board.BoardManageState
 import woowacourse.kanban.domain.card.Card
 import woowacourse.kanban.domain.card.CardManagerState
 import woowacourse.kanban.domain.card.CardTaskState
 import woowacourse.kanban.ui.board.common.toDisplayText
 import woowacourse.kanban.ui.card.CardEditorDialog
 import woowacourse.kanban.ui.card.CardScreen
+import woowacourse.kanban.ui.card.editor.CardEditorMode
+import woowacourse.kanban.ui.card.editor.CardEditorState
 import woowacourse.kanban.ui.theme.BoardColor.DoneContentColor
 import woowacourse.kanban.ui.theme.BoardColor.DoneHeaderColor
 import woowacourse.kanban.ui.theme.BoardColor.InProgressContentColor
@@ -69,18 +75,25 @@ import woowacourse.kanban.ui.theme.BoardColor.TodoHeaderColor
 @Composable
 fun BoardScreen(
     board: Board,
-    onAddCard: (Card) -> Unit,
     onBoardChange: (Board) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var showCardCreationPanel by remember { mutableStateOf(false) }
+    var showCardEditorDialog by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
+    var mode by remember { mutableStateOf(CardEditorMode.ADD) }
+    var selectedCard by remember { mutableStateOf<Card?>(null) }
+    var cardEditorState by remember { mutableStateOf(CardEditorState()) }
 
     BoardScreenContents(
         board = board,
-        showCardCreationPanel = showCardCreationPanel,
-        onShowCardCreationPanelChange = { showCardCreationPanel = it },
-        onAddCard = onAddCard,
+        showCardEditorDialog = showCardEditorDialog,
+        mode = mode,
+        selectedCard = selectedCard,
+        cardEditorState = cardEditorState,
+        onShowCardEditorDialogChange = { showCardEditorDialog = it },
+        onModeChange = { mode = it },
+        onSelectedCardChange = { selectedCard = it },
+        onCardEditorStateChange = { cardEditorState = it },
         onBoardChange = onBoardChange,
         snackbarHostState = snackbarHostState,
         modifier = modifier.fillMaxSize(),
@@ -90,18 +103,23 @@ fun BoardScreen(
 /**
  * 보드 화면입니다. 프로젝트 화면의 우측 보드 영역입니다.
  * @param board 보드 데이터입니다.
- * @param showCardCreationPanel 카드 생성 모달을 보여줄지 여부입니다.
+ * @param showCardEditorDialog 카드 생성 모달을 보여줄지 여부입니다.
  * @param onAddCard 보드에 카드를 추가합니다.
- * @param onShowCardCreationPanelChange 카드 생성창 표시 여부입니다.
+ * @param onShowCardEditorDialogChange 카드 생성창 표시 여부입니다.
  * @param modifier Modifier
  * @param onBoardChange 보드 데이터를 변경합니다.
  */
 @Composable
 internal fun BoardScreenContents(
     board: Board,
-    showCardCreationPanel: Boolean,
-    onShowCardCreationPanelChange: (Boolean) -> Unit,
-    onAddCard: (Card) -> Unit,
+    showCardEditorDialog: Boolean,
+    mode: CardEditorMode,
+    selectedCard: Card?,
+    cardEditorState: CardEditorState,
+    onShowCardEditorDialogChange: (Boolean) -> Unit,
+    onModeChange: (CardEditorMode) -> Unit,
+    onSelectedCardChange: (Card?) -> Unit,
+    onCardEditorStateChange: (CardEditorState) -> Unit,
     onBoardChange: (Board) -> Unit,
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
@@ -127,35 +145,98 @@ internal fun BoardScreenContents(
                     modifier = Modifier.fillMaxWidth(),
                     board = board,
                     onClick = {
-                        onShowCardCreationPanelChange(true)
+                        onModeChange(CardEditorMode.ADD)
+                        onSelectedCardChange(null)
+                        onCardEditorStateChange(CardEditorState())
+                        onShowCardEditorDialogChange(true)
                     },
                 )
                 BoardContents(
                     modifier = Modifier.fillMaxSize(),
                     board = board,
-                    onChangeContent = {
-                        onBoardChange(it)
-                        coroutineScope.launch {
-                            snackbarHostState.showSnackbar("태스크가 이동되었습니다.")
+                    onMoveCard = { result ->
+                        if (result.status == BoardManageState.SUCCESS) {
+                            onBoardChange(result.board)
+                        } else {
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(result.status.message())
+                            }
                         }
+                    },
+                    onCardClick = { card ->
+                        onModeChange(CardEditorMode.EDIT)
+                        onSelectedCardChange(card)
+                        onCardEditorStateChange(
+                            CardEditorState(
+                                title = card.title,
+                                content = card.content,
+                                tagInput = card.tags.joinToString(", "),
+                                taskState = card.taskState,
+                                managerState = card.managerState,
+                            ),
+                        )
+                        onShowCardEditorDialogChange(true)
+                        onShowCardEditorDialogChange(true)
                     },
                 )
             }
 
-            if (showCardCreationPanel) {
+            if (showCardEditorDialog) {
                 CardEditorDialog(
-                    onAddItem = { newCard ->
-                        onAddCard(newCard)
-                        onShowCardCreationPanelChange(false)
-                        coroutineScope.launch {
-                            snackbarHostState.showSnackbar("새로운 태스크가 추가되었습니다.")
+                    mode = mode,
+                    cardEditorState = cardEditorState,
+                    onCardEditorStateChange = { onCardEditorStateChange(it) },
+                    onSubmit = { editorState ->
+                        when (mode) {
+                            CardEditorMode.ADD -> {
+                                val updatedBoard = createCard(board, editorState)
+                                onBoardChange(updatedBoard)
+                                onShowCardEditorDialogChange(false)
+
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar("새로운 태스크가 추가되었습니다.")
+                                }
+                            }
+
+                            CardEditorMode.EDIT -> {
+                                val editingCard = selectedCard!!
+                                val result = editCard(board, editingCard, editorState)
+
+                                if (result.status == BoardManageState.SUCCESS) {
+                                    onBoardChange(result.board)
+                                    onShowCardEditorDialogChange(false)
+
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar("태스크가 수정되었습니다.")
+                                    }
+                                } else {
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(result.status.message())
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    onDelete = {
+                        val editingCard = selectedCard!!
+
+                        val result = board.deleteCard(editingCard.id)
+
+                        if (result.status == BoardManageState.SUCCESS) {
+                            onBoardChange(result.board)
+                            onShowCardEditorDialogChange(false)
+
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar("태스크가 삭제되었습니다.")
+                            }
+                        } else {
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar("해당 상태에서는 태스크 삭제가 불가합니다.")
+                            }
                         }
                     },
                     onDismiss = {
-                        onShowCardCreationPanelChange(false)
-                        coroutineScope.launch {
-                            snackbarHostState.showSnackbar("새 태스크 추가가 취소되었습니다.")
-                        }
+                        onShowCardEditorDialogChange(false)
                     },
                 )
             }
@@ -265,29 +346,32 @@ private fun BoardHeaderSection(
 private fun BoardContents(
     modifier: Modifier = Modifier,
     board: Board,
-    onChangeContent: (Board) -> Unit = {},
+    onMoveCard: (BoardManageResult) -> Unit = {},
+    onCardClick: (Card) -> Unit = {},
 ) {
-    var draggedTask by remember { mutableStateOf<Card?>(null) }
+    val currentBoard by rememberUpdatedState(board)
+    var draggedTaskId by remember { mutableStateOf<String?>(null) }
     var currentDragPosition by remember { mutableStateOf<Offset?>(null) }
     val columnBounds = remember { mutableStateMapOf<CardTaskState, Rect>() }
 
     fun taskEnd() {
         val dropPosition = currentDragPosition
         val targetStatus = columnBounds.entries
-            .firstOrNull { (_, rect) -> dropPosition?.let { rect.contains(it) } == true }?.key
+            .firstOrNull { (_, rect) -> dropPosition?.let { rect.contains(it) } == true }
+            ?.key
 
-        draggedTask?.let { task ->
-            if (targetStatus != null && task.taskState != targetStatus) {
-                onChangeContent(board.moveCard(task.id, targetStatus))
-            }
+        val taskId = draggedTaskId
+        if (taskId != null && targetStatus != null) {
+            onMoveCard(currentBoard.moveCard(taskId, targetStatus))
         }
+
         currentDragPosition = null
-        draggedTask = null
+        draggedTaskId = null
     }
 
     fun taskDragCancel() {
         currentDragPosition = null
-        draggedTask = null
+        draggedTaskId = null
     }
 
     Row(
@@ -307,10 +391,11 @@ private fun BoardContents(
                     currentDragPosition?.let { columnBounds[state]?.contains(it) } ?: false
                 },
                 onBoundsChanged = { rect -> columnBounds[state] = rect },
-                onTaskDragStart = { task -> draggedTask = task },
+                onTaskDragStart = { task -> draggedTaskId = task.id },
                 onTaskDragChange = { pos -> currentDragPosition = pos },
                 onTaskDragEnd = ::taskEnd,
                 onTaskDragCancel = ::taskDragCancel,
+                onCardClick = onCardClick,
             )
         }
     }
@@ -339,8 +424,8 @@ private fun BoardCardColumn(
     onTaskDragChange: (Offset) -> Unit = {},
     onTaskDragEnd: () -> Unit = {},
     onTaskDragCancel: () -> Unit = {},
-
-    ) {
+    onCardClick: (Card) -> Unit = {},
+) {
     val isDropTarget by remember { derivedStateOf { getIsDropTarget() } }
     val lastBoundsHolder = remember { mutableStateOf<Rect?>(null) }
     val headerColor = when (mode) {
@@ -416,7 +501,8 @@ private fun BoardCardColumn(
                 key = { card -> card.id },
             ) { card ->
                 CardScreen(
-                    cardData = card,
+                    modifier = Modifier.clickable { onCardClick(card) },
+                    card = card,
                     onDragStart = { onTaskDragStart(card) },
                     onDragChange = onTaskDragChange,
                     onDragEnd = onTaskDragEnd,
@@ -427,11 +513,38 @@ private fun BoardCardColumn(
     }
 }
 
+private fun createCard(board: Board, editorState: CardEditorState): Board {
+    val newCard = Card.create(
+        title = editorState.title,
+        content = editorState.content,
+        tags = editorState.tags,
+        manager = editorState.managerState,
+        state = editorState.taskState,
+    )
+    return board.addCard(newCard)
+}
+
+private fun editCard(
+    board: Board,
+    originalCard: Card,
+    editorState: CardEditorState,
+): BoardManageResult {
+    val updatedCard = Card.update(
+        id = originalCard.id,
+        title = editorState.title,
+        content = editorState.content,
+        tags = editorState.tags,
+        manager = editorState.managerState,
+        state = editorState.taskState,
+    )
+    return board.updateCard(updatedCard)
+}
+
 /* Preview */
 
 data class BoardScreenPreviewState(
     val board: Board,
-    val showCardCreationPanel: Boolean,
+    val showCardEditorDialog: Boolean,
 )
 
 class BoardScreenPreviewProvider : PreviewParameterProvider<BoardScreenPreviewState> {
@@ -439,7 +552,7 @@ class BoardScreenPreviewProvider : PreviewParameterProvider<BoardScreenPreviewSt
         get() = sequenceOf(
             BoardScreenPreviewState(
                 board = Board(cards = emptyList()),
-                showCardCreationPanel = false,
+                showCardEditorDialog = false,
             ),
             BoardScreenPreviewState(
                 board = Board(
@@ -467,7 +580,7 @@ class BoardScreenPreviewProvider : PreviewParameterProvider<BoardScreenPreviewSt
                         ),
                     ),
                 ),
-                showCardCreationPanel = false,
+                showCardEditorDialog = false,
             ),
             BoardScreenPreviewState(
                 board = Board(
@@ -488,7 +601,7 @@ class BoardScreenPreviewProvider : PreviewParameterProvider<BoardScreenPreviewSt
                         ),
                     ),
                 ),
-                showCardCreationPanel = false,
+                showCardEditorDialog = false,
             ),
             BoardScreenPreviewState(
                 board = Board(
@@ -502,7 +615,7 @@ class BoardScreenPreviewProvider : PreviewParameterProvider<BoardScreenPreviewSt
                         ),
                     ),
                 ),
-                showCardCreationPanel = true,
+                showCardEditorDialog = true,
             ),
         )
 }
@@ -520,10 +633,15 @@ private fun BoardScreenPreview(
 ) {
     BoardScreenContents(
         board = state.board,
-        showCardCreationPanel = state.showCardCreationPanel,
-        onShowCardCreationPanelChange = {},
-        onAddCard = {},
+        showCardEditorDialog = state.showCardEditorDialog,
+        onShowCardEditorDialogChange = {},
         onBoardChange = {},
+        mode = CardEditorMode.ADD,
+        selectedCard = null,
+        cardEditorState = CardEditorState(),
+        onModeChange = {},
+        onSelectedCardChange = {},
+        onCardEditorStateChange = {},
         snackbarHostState = SnackbarHostState(),
     )
 }
