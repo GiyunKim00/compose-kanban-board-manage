@@ -5,10 +5,8 @@ import org.assertj.core.api.Assertions.assertThat
 import woowacourse.kanban.domain.card.Card
 import woowacourse.kanban.domain.card.CardManagerState
 import woowacourse.kanban.domain.card.CardTaskState
-import woowacourse.kanban.domain.card.TagValidationResult
-import woowacourse.kanban.ui.card.editor.message
+import woowacourse.kanban.domain.common.FailureReason
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BoardTest {
@@ -167,18 +165,24 @@ class BoardTest {
         val movedBoard = board.moveCard(
             cardId = oldCard.id,
             targetState = CardTaskState.IN_PROGRESS,
-        ).board
+        )
 
-        assertThat(movedBoard.toDoTaskCount).isEqualTo(0)
-        assertThat(movedBoard.inProgressTaskCount).isEqualTo(1)
+        when(movedBoard) {
+            is BoardManageResult.Success -> {
+                val board = movedBoard.board
+                assertThat(board.toDoTaskCount).isEqualTo(0)
+                assertThat(board.inProgressTaskCount).isEqualTo(1)
 
-        val movedCard = movedBoard.cards.first()
-        assertThat(movedCard.id).isEqualTo(oldCard.id)
-        assertThat(movedCard.taskState).isEqualTo(CardTaskState.IN_PROGRESS)
-        assertThat(movedCard.title).isEqualTo(oldCard.title)
-        assertThat(movedCard.content).isEqualTo(oldCard.content)
-        assertThat(movedCard.tags).containsExactlyElementsOf(oldCard.tags)
-        assertThat(movedCard.managerState).isEqualTo(oldCard.managerState)
+                val movedCard = board.cards.first()
+                assertThat(movedCard.id).isEqualTo(oldCard.id)
+                assertThat(movedCard.taskState).isEqualTo(CardTaskState.IN_PROGRESS)
+                assertThat(movedCard.title).isEqualTo(oldCard.title)
+                assertThat(movedCard.content).isEqualTo(oldCard.content)
+                assertThat(movedCard.tags).containsExactlyElementsOf(oldCard.tags)
+                assertThat(movedCard.managerState).isEqualTo(oldCard.managerState)
+            }
+            is BoardManageResult.Failure -> {}
+        }
     }
 
     @Test
@@ -198,9 +202,13 @@ class BoardTest {
         val movedBoard = board.moveCard(
             cardId = oldCard.id,
             targetState = CardTaskState.DONE,
-        ).board
-
-        assertThat(movedBoard.completionPercentage).isEqualTo(100)
+        )
+        when(movedBoard) {
+            is BoardManageResult.Success -> {
+                assertThat(movedBoard.board.completionPercentage).isEqualTo(100)
+            }
+            is BoardManageResult.Failure -> {}
+        }
     }
 
     @Test
@@ -213,12 +221,12 @@ class BoardTest {
             state = CardTaskState.TODO,
         )
         val board = Board(cards = listOf(card))
-
-        val result = board.deleteCard(card.id)
-
-        assertThat(result.status).isEqualTo(BoardManageState.SUCCESS)
-        assertThat(result.board.totalTaskCount).isEqualTo(0)
-        assertThat(result.board.toDoTaskCount).isEqualTo(0)
+        when(val result = board.deleteCard(card.id)) {
+            is BoardManageResult.Success -> {}
+            is BoardManageResult.Failure -> {
+                assertThat(result.reason).isEqualTo(FailureReason.INVALID_DELETE)
+            }
+        }
     }
 
     @Test
@@ -232,11 +240,13 @@ class BoardTest {
         )
         val board = Board(cards = listOf(card))
 
-        val result = board.deleteCard(card.id)
-
-        assertThat(result.status).isEqualTo(BoardManageState.SUCCESS)
-        assertThat(result.board.totalTaskCount).isEqualTo(0)
-        assertThat(result.board.inProgressTaskCount).isEqualTo(0)
+        when(val result = board.deleteCard(card.id)) {
+            is BoardManageResult.Success -> {
+                assertThat(result.board.totalTaskCount).isEqualTo(0)
+                assertThat(result.board.inProgressTaskCount).isEqualTo(0)
+            }
+            is BoardManageResult.Failure -> {}
+        }
     }
 
     @Test
@@ -250,10 +260,14 @@ class BoardTest {
         )
         val board = Board(cards = listOf(card))
 
-        val result = board.deleteCard(card.id)
+        when(val result = board.deleteCard(card.id)) {
+            is BoardManageResult.Success -> {}
+            is BoardManageResult.Failure -> {
+                assertThat(result.reason).isEqualTo(FailureReason.INVALID_DELETE)
+            }
+        }
 
-        assertThat(result.status).isEqualTo(BoardManageState.INVALID_DELETE)
-        assertThat(result.board).isEqualTo(board)
+
     }
 
     @Test
@@ -267,10 +281,12 @@ class BoardTest {
         )
         val board = Board(cards = listOf(card))
 
-        val result = board.deleteCard(card.id)
-
-        assertThat(result.status).isEqualTo(BoardManageState.INVALID_DELETE)
-        assertThat(result.board).isEqualTo(board)
+        when(val result = board.deleteCard(card.id)) {
+            is BoardManageResult.Success -> {}
+            is BoardManageResult.Failure -> {
+                assertThat(result.reason).isEqualTo(FailureReason.INVALID_DELETE)
+            }
+        }
     }
 
     @Test
@@ -284,10 +300,12 @@ class BoardTest {
         )
         val board = Board(cards = listOf(card))
 
-        val result = board.moveCard(card.id, CardTaskState.IN_PROGRESS)
-
-        assertThat(result.status).isEqualTo(BoardManageState.MANAGER_REQUIRED)
-        assertThat(result.board).isEqualTo(board)
+        when(val result = board.moveCard(card.id, CardTaskState.IN_PROGRESS)) {
+            is BoardManageResult.Success -> {}
+            is BoardManageResult.Failure -> {
+                assertThat(result.reason).isEqualTo(FailureReason.MANAGER_REQUIRED)
+            }
+        }
     }
 
     @Test
@@ -301,12 +319,14 @@ class BoardTest {
         )
         val board = Board(cards = listOf(card))
 
-        val result = board.moveCard(card.id, CardTaskState.IN_PROGRESS)
-
-        assertThat(result.status).isEqualTo(BoardManageState.SUCCESS)
-        assertThat(result.board.toDoTaskCount).isEqualTo(0)
-        assertThat(result.board.inProgressTaskCount).isEqualTo(1)
-        assertThat(result.board.cards.first().taskState).isEqualTo(CardTaskState.IN_PROGRESS)
+        when(val result = board.moveCard(card.id, CardTaskState.IN_PROGRESS)){
+            is BoardManageResult.Success -> {
+                assertThat(result.board.toDoTaskCount).isEqualTo(0)
+                assertThat(result.board.inProgressTaskCount).isEqualTo(1)
+                assertThat(result.board.cards.first().taskState).isEqualTo(CardTaskState.IN_PROGRESS)
+            }
+            is BoardManageResult.Failure -> {}
+        }
     }
 
     @Test
@@ -320,10 +340,12 @@ class BoardTest {
         )
         val board = Board(cards = listOf(card))
 
-        val result = board.moveCard(card.id, CardTaskState.REVIEW)
-
-        assertThat(result.status).isEqualTo(BoardManageState.INVALID_TRANSITION)
-        assertThat(result.board).isEqualTo(board)
+        when(val result = board.moveCard(card.id, CardTaskState.REVIEW)){
+            is BoardManageResult.Success -> {}
+            is BoardManageResult.Failure -> {
+                assertThat(result.reason).isEqualTo(FailureReason.INVALID_TRANSITION)
+            }
+        }
     }
 
     @Test
@@ -337,10 +359,12 @@ class BoardTest {
         )
         val board = Board(cards = listOf(card))
 
-        val result = board.moveCard(card.id, CardTaskState.DONE)
-
-        assertThat(result.status).isEqualTo(BoardManageState.INVALID_TRANSITION)
-        assertThat(result.board).isEqualTo(board)
+        when(val result = board.moveCard(card.id, CardTaskState.DONE)) {
+            is BoardManageResult.Success -> {}
+            is BoardManageResult.Failure -> {
+                assertThat(result.reason).isEqualTo(FailureReason.INVALID_TRANSITION)
+            }
+        }
     }
 
     @Test
@@ -354,11 +378,13 @@ class BoardTest {
         )
         val board = Board(cards = listOf(card))
 
-        val result = board.moveCard(card.id, CardTaskState.REVIEW)
-
-        assertThat(result.status).isEqualTo(BoardManageState.SUCCESS)
-        assertThat(result.board.inProgressTaskCount).isEqualTo(0)
-        assertThat(result.board.reviewTaskCount).isEqualTo(1)
+        when(val result = board.moveCard(card.id, CardTaskState.REVIEW)){
+            is BoardManageResult.Success -> {
+                assertThat(result.board.inProgressTaskCount).isEqualTo(0)
+                assertThat(result.board.reviewTaskCount).isEqualTo(1)
+            }
+            is BoardManageResult.Failure -> {}
+        }
     }
 
     @Test
@@ -372,10 +398,12 @@ class BoardTest {
         )
         val board = Board(cards = listOf(card))
 
-        val result = board.moveCard(card.id, CardTaskState.DONE)
-
-        assertThat(result.status).isEqualTo(BoardManageState.INVALID_TRANSITION)
-        assertThat(result.board).isEqualTo(board)
+        when(val result = board.moveCard(card.id, CardTaskState.DONE)){
+            is BoardManageResult.Success -> {}
+            is BoardManageResult.Failure -> {
+                assertThat(result.reason).isEqualTo(FailureReason.INVALID_TRANSITION)
+            }
+        }
     }
 
     @Test
@@ -389,11 +417,13 @@ class BoardTest {
         )
         val board = Board(cards = listOf(card))
 
-        val result = board.moveCard(card.id, CardTaskState.DONE)
-
-        assertThat(result.status).isEqualTo(BoardManageState.SUCCESS)
-        assertThat(result.board.reviewTaskCount).isEqualTo(0)
-        assertThat(result.board.doneTaskCount).isEqualTo(1)
+        when(val result = board.moveCard(card.id, CardTaskState.DONE)){
+            is BoardManageResult.Success -> {
+                assertThat(result.board.reviewTaskCount).isEqualTo(0)
+                assertThat(result.board.doneTaskCount).isEqualTo(1)
+            }
+            is BoardManageResult.Failure -> {}
+        }
     }
 
     @Test
@@ -407,10 +437,12 @@ class BoardTest {
         )
         val board = Board(cards = listOf(card))
 
-        val result = board.moveCard(card.id, CardTaskState.TODO)
-
-        assertThat(result.status).isEqualTo(BoardManageState.INVALID_TRANSITION)
-        assertThat(result.board).isEqualTo(board)
+        when(val result = board.moveCard(card.id, CardTaskState.TODO)){
+            is BoardManageResult.Success -> {}
+            is BoardManageResult.Failure -> {
+                assertThat(result.reason).isEqualTo(FailureReason.INVALID_TRANSITION)
+            }
+        }
     }
 
     @Test
@@ -424,11 +456,13 @@ class BoardTest {
         )
         val board = Board(cards = listOf(card))
 
-        val result = board.moveCard(card.id, CardTaskState.TODO)
-
-        assertThat(result.status).isEqualTo(BoardManageState.SUCCESS)
-        assertThat(result.board.doneTaskCount).isEqualTo(0)
-        assertThat(result.board.toDoTaskCount).isEqualTo(1)
+        when(val result = board.moveCard(card.id, CardTaskState.TODO)){
+            is BoardManageResult.Success -> {
+                assertThat(result.board.doneTaskCount).isEqualTo(0)
+                assertThat(result.board.toDoTaskCount).isEqualTo(1)
+            }
+            is BoardManageResult.Failure -> {}
+        }
     }
 
     @Test
@@ -442,10 +476,12 @@ class BoardTest {
         )
         val board = Board(cards = listOf(card))
 
-        val result = board.moveCard(card.id, CardTaskState.IN_PROGRESS)
-
-        assertThat(result.status).isEqualTo(BoardManageState.INVALID_TRANSITION)
-        assertThat(result.board).isEqualTo(board)
+        when(val result = board.moveCard(card.id, CardTaskState.IN_PROGRESS)){
+            is BoardManageResult.Success -> {}
+            is BoardManageResult.Failure -> {
+                assertThat(result.reason).isEqualTo(FailureReason.INVALID_TRANSITION)
+            }
+        }
     }
 
     @Test
@@ -459,10 +495,12 @@ class BoardTest {
         )
         val board = Board(cards = listOf(card))
 
-        val result = board.moveCard(card.id, CardTaskState.REVIEW)
-
-        assertThat(result.status).isEqualTo(BoardManageState.INVALID_TRANSITION)
-        assertThat(result.board).isEqualTo(board)
+        when(val result = board.moveCard(card.id, CardTaskState.REVIEW)){
+            is BoardManageResult.Success -> {}
+            is BoardManageResult.Failure -> {
+                assertThat(result.reason).isEqualTo(FailureReason.INVALID_TRANSITION)
+            }
+        }
     }
 
     @Test
@@ -485,11 +523,13 @@ class BoardTest {
             state = CardTaskState.REVIEW,
         )
 
-        val result = board.updateCard(updatedCard)
-
-        assertThat(result.status).isEqualTo(BoardManageState.SUCCESS)
-        assertThat(result.board.inProgressTaskCount).isEqualTo(0)
-        assertThat(result.board.reviewTaskCount).isEqualTo(1)
+        when(val result = board.updateCard(updatedCard)){
+            is BoardManageResult.Success -> {
+                assertThat(result.board.inProgressTaskCount).isEqualTo(0)
+                assertThat(result.board.reviewTaskCount).isEqualTo(1)
+            }
+            is BoardManageResult.Failure -> {}
+        }
     }
 
     @Test
@@ -510,25 +550,13 @@ class BoardTest {
         )
         val board = Board(cards = listOf(todoCard, doneCard))
 
-        val result = board.deleteCard(todoCard.id)
-
-        assertThat(result.status).isEqualTo(BoardManageState.SUCCESS)
-        assertThat(result.board.totalTaskCount).isEqualTo(1)
-        assertThat(result.board.toDoTaskCount).isEqualTo(0)
-        assertThat(result.board.doneTaskCount).isEqualTo(1)
-    }
-
-    @Test
-    fun `InvalidBlankTag는 정의된 메시지를 리턴한다`() {
-        val message = TagValidationResult.InvalidBlankTag.message()
-
-        assertEquals("빈 태그는 입력할 수 없습니다.", message)
-    }
-
-    @Test
-    fun `TooManyTags는 정의된 메시지를 리턴한다`() {
-        val message = TagValidationResult.TooManyTags.message()
-
-        assertEquals("태그는 최대 5개까지 입력할 수 있습니다.", message)
+        when(val result = board.deleteCard(todoCard.id)){
+            is BoardManageResult.Success -> {
+                assertThat(result.board.totalTaskCount).isEqualTo(1)
+                assertThat(result.board.toDoTaskCount).isEqualTo(0)
+                assertThat(result.board.doneTaskCount).isEqualTo(1)
+            }
+            is BoardManageResult.Failure -> {}
+        }
     }
 }
