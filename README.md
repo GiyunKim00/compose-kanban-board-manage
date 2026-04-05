@@ -24,7 +24,7 @@
 - [x] 상태 전이/수정 정책을 CardTaskState 내부로 이동시켜 상태가 자신의 규칙을 직접 판단하도록 변경
 - [ ] Board Unit 테스트 내 불필요한 테스트 / UI에 의존하는 테스트 제거
 - [ ] !! 대신 labeled return(local return) 활용
-- [ ] VIEW 모드 등 확장 가능성 대응을 위한 display state 작성
+- [x] VIEW 모드 등 확장 가능성 대응을 위한 display state 작성
 
 ### UI
 

@@ -42,6 +42,7 @@ import woowacourse.kanban.ui.card.editor.CardEditorButtonDefaultSetting
 import woowacourse.kanban.ui.card.editor.CardEditorFormSection
 import woowacourse.kanban.ui.card.editor.CardEditorMode
 import woowacourse.kanban.ui.card.editor.CardEditorState
+import woowacourse.kanban.ui.card.editor.displayInfo
 import woowacourse.kanban.ui.card.editor.message
 import woowacourse.kanban.ui.theme.KanbanCardColor.DefaultBackground
 import woowacourse.kanban.ui.theme.KanbanCardColor.DefaultContent
@@ -84,6 +85,7 @@ internal fun CardEditorDialogContents(
     onDelete: (() -> Unit)?,
     onDismiss: () -> Unit,
 ) {
+    val display = mode.displayInfo()
     val titleValidationResult = cardEditorState.titleValidationResult
     val tagValidationResult = cardEditorState.tagValidationResult
 
@@ -94,7 +96,7 @@ internal fun CardEditorDialogContents(
             modifier = Modifier.background(DefaultBackground),
         ) {
             CardHeaderSection(
-                mode = mode,
+                title = display.title,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 28.dp, horizontal = 24.dp),
@@ -161,7 +163,9 @@ internal fun CardEditorDialogContents(
                 HorizontalDivider(modifier = Modifier.fillMaxWidth())
 
                 CardEditorButtonSection(
-                    mode = mode,
+                    submitText = display.submitText,
+                    showSubmitButton = display.showSubmitButton,
+                    showDeleteButton = display.showDeleteButton,
                     submitEnabled = cardEditorState.isSubmitEnabled,
                     onCancelClick = onDismiss,
                     onSubmitClick = { onSubmit(cardEditorState) },
@@ -174,14 +178,10 @@ internal fun CardEditorDialogContents(
 
 @Composable
 private fun CardHeaderSection(
-    mode: CardEditorMode,
+    title: String,
     modifier: Modifier,
     onClose: () -> Unit,
 ) {
-    val title = when (mode) {
-        CardEditorMode.ADD -> "새 태스크 생성"
-        CardEditorMode.EDIT -> "기존 태스크 수정"
-    }
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -354,7 +354,9 @@ private fun ManagerButton(
 
 @Composable
 private fun CardEditorButtonSection(
-    mode: CardEditorMode,
+    submitText: String,
+    showSubmitButton: Boolean,
+    showDeleteButton: Boolean,
     submitEnabled: Boolean,
     modifier: Modifier = Modifier,
     onCancelClick: () -> Unit,
@@ -375,9 +377,8 @@ private fun CardEditorButtonSection(
             onClick = onCancelClick,
         )
 
-        Spacer(modifier = Modifier.width(12.dp))
-
-        if (mode == CardEditorMode.EDIT) {
+        if (showDeleteButton) {
+            Spacer(modifier = Modifier.width(12.dp))
             CardEditorButton(
                 text = "삭제",
                 contentColor = CardEditorButtonDefaultSetting.DeleteContentColor,
@@ -386,16 +387,19 @@ private fun CardEditorButtonSection(
                 enabled = true,
                 onClick = { onDeleteClick?.invoke() },
             )
-            Spacer(modifier = Modifier.width(12.dp))
         }
-        CardEditorButton(
-            text = if (mode == CardEditorMode.ADD) "생성" else "수정",
-            contentColor = CardEditorButtonDefaultSetting.SubmitContentColor,
-            containerColor = CardEditorButtonDefaultSetting.SubmitContainerColor,
-            elevation = CardEditorButtonDefaultSetting.SubmitElevation,
-            enabled = submitEnabled,
-            onClick = onSubmitClick,
-        )
+
+        if (showSubmitButton) {
+            Spacer(modifier = Modifier.width(12.dp))
+            CardEditorButton(
+                text = submitText,
+                contentColor = CardEditorButtonDefaultSetting.SubmitContentColor,
+                containerColor = CardEditorButtonDefaultSetting.SubmitContainerColor,
+                elevation = CardEditorButtonDefaultSetting.SubmitElevation,
+                enabled = submitEnabled,
+                onClick = onSubmitClick,
+            )
+        }
     }
 }
 
