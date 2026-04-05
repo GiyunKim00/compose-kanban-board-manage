@@ -150,7 +150,7 @@ fun CardScreenContents(
             HorizontalDivider()
 
             CardAccountInfo(
-                accountName = managerState!!.toDisplayText(),
+                accountName = managerState.toDisplayText(),
                 modifier = Modifier
                     .padding(vertical = 10.dp)
                     .fillMaxWidth()
