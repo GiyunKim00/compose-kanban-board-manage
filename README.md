@@ -10,6 +10,21 @@
 - Done: 태스크 삭제 불가능. 담당자 지정 필수
 - 태스크 상태 전이 규칙을 적용한다. 규칙에 정의되지 않은 상태 전이는 불가능하다.
 
+## 리팩토링
+### 0차
+- Review State 추가
+- ManagerState nullable로 수정
+- Board 내 제어로직 및 API 추가
+- Card 내 업데이트 로직 추가
+### 1차 피드백
+- [ ] BoardManageResult 개선 및 FailureReason 도입을 통한 Board-Card 간 순환참조 제거
+- [ ] CardUpdateResult 개선 및 FailureReason 도입을 통한 Board-Card 간 순환참조 제거
+- [ ] CardTaskState에 전이 로직을 포함시켜, validateTransition의 책임 과중에 따른 부작용 해결
+- [ ] 보드 UI 로직 내 최상위 함수(createCard, editCard) 제거 및 CardEditorState 확장함수로 변경
+- [ ] Board Unit 테스트 내 불필요한 테스트 / UI에 의존하는 테스트 제거
+- [ ] !! 대신 labeled return(local return) 활용
+- [ ] VIEW 모드 등 확장 가능성 대응을 위한 display state 작성
+
 ### UI
 
 - [x] 태스크 카드 클릭 시 수정/삭제 다이얼로그를 노출한다.
@@ -82,10 +97,3 @@
 - [x] 태스크 수정 / 삭제 시 Board의 상태별 태스크 개수가 변경된다.
 - [x] 태스크 수정 / 삭제 시 완료율이 변경된다.
 - [x] 태스크 수정 / 삭제 시 프로그레스 계산값이 변경된다.
-
-## 리팩토링
-### 0차
-- Review State 추가
-- ManagerState nullable로 수정
-- Board 내 제어로직 및 API 추가
-- Card 내 업데이트 로직 추가
