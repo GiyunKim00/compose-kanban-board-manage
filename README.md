@@ -25,7 +25,7 @@
 - [x] Board Unit 테스트 내 불필요한 테스트 / UI에 의존하는 테스트 제거
 - [x] !! 대신 labeled return(local return) 활용
 - [x] VIEW 모드 등 확장 가능성 대응을 위한 display state 작성
-
+- 드래그 앤 드롭 테스트 수정 실패 
 ### UI
 
 - [x] 태스크 카드 클릭 시 수정/삭제 다이얼로그를 노출한다.

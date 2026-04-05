@@ -388,7 +388,8 @@ private fun BoardContents(
             BoardCardColumn(
                 modifier = Modifier
                     .width(320.dp)
-                    .height(748.dp),
+                    .height(748.dp)
+                    .testTag("$state column"),
                 filteredCards = board.cardsByState(state),
                 mode = state,
                 getIsDropTarget = {
