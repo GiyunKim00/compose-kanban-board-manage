@@ -17,9 +17,9 @@
 - Board 내 제어로직 및 API 추가
 - Card 내 업데이트 로직 추가
 ### 1차 피드백
-- [ ] BoardManageResult 개선 및 FailureReason 도입을 통한 Board-Card 간 순환참조 제거
-- [ ] CardUpdateResult 개선 및 FailureReason 도입을 통한 Board-Card 간 순환참조 제거
-- [ ] CardTaskState에 전이 로직을 포함시켜, validateTransition의 책임 과중에 따른 부작용 해결
+- [x] BoardManageResult 개선 및 FailureReason 도입을 통한 Board-Card 간 순환참조 제거
+- [x] CardUpdateResult 개선 및 FailureReason 도입을 통한 Board-Card 간 순환참조 제거
+- [x] CardTaskState에 전이 로직을 포함시켜, validateTransition의 책임 과중에 따른 부작용 해결
 - [ ] 보드 UI 로직 내 최상위 함수(createCard, editCard) 제거 및 CardEditorState 확장함수로 변경
 - [ ] Board Unit 테스트 내 불필요한 테스트 / UI에 의존하는 테스트 제거
 - [ ] !! 대신 labeled return(local return) 활용

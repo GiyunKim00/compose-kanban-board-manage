@@ -1,8 +1,10 @@
 package woowacourse.kanban.domain.board
 
 import woowacourse.kanban.domain.card.Card
-import woowacourse.kanban.domain.card.CardManagerState
+import woowacourse.kanban.domain.card.CardMoveResult
 import woowacourse.kanban.domain.card.CardTaskState
+import woowacourse.kanban.domain.card.CardUpdateResult
+import woowacourse.kanban.domain.common.FailureReason
 import woowacourse.kanban.domain.common.generateId
 
 /**
@@ -32,51 +34,45 @@ data class Board(
     fun moveCard(cardId: String, targetState: CardTaskState): BoardManageResult {
         val originalCard = cards.first { it.id == cardId }
 
-        val state = validateTransition(
-            card = originalCard,
-            targetState = targetState,
-            targetManager = originalCard.managerState,
-        )
+        return when (val result = originalCard.move(targetState)) {
+            is CardMoveResult.Success -> {
+                val updatedBoard = updatedBoardWithNewCard(result.card)
+                BoardManageResult.Success(updatedBoard)
+            }
 
-        if (state != BoardManageState.SUCCESS) {
-            return BoardManageResult(this, state)
+            is CardMoveResult.Failure -> {
+                BoardManageResult.Failure(result.reason)
+            }
         }
-
-        val updatedBoard = updatedBoardWithNewCard(
-            originalCard.updateWithNewState(targetState)
-        )
-
-        return BoardManageResult(updatedBoard, BoardManageState.SUCCESS)
     }
 
     fun deleteCard(cardId: String): BoardManageResult {
         val targetCard = cards.first { it.id == cardId }
-        if (!validateDelete(targetCard)) {
-            return BoardManageResult(this, BoardManageState.INVALID_DELETE)
+
+        if (!targetCard.canDelete()) {
+            return BoardManageResult.Failure(FailureReason.INVALID_DELETE)
         }
 
         val updatedBoard = copy(
             cards = cards.filterNot { it.id == cardId },
         )
 
-        return BoardManageResult(updatedBoard, BoardManageState.SUCCESS)
+        return BoardManageResult.Success(updatedBoard)
     }
 
-    fun updateCard(targetCard:Card): BoardManageResult {
+    fun updateCard(targetCard: Card): BoardManageResult {
         val originalCard = cards.first { it.id == targetCard.id }
 
-        val state = validateTransition(
-            card = originalCard,
-            targetState = targetCard.taskState,
-            targetManager = targetCard.managerState,
-        )
+        return when (val result = originalCard.taskState.update(originalCard, targetCard)) {
+            is CardUpdateResult.Success -> {
+                val updatedBoard = updatedBoardWithNewCard(result.card)
+                BoardManageResult.Success(updatedBoard)
+            }
 
-        if (state != BoardManageState.SUCCESS) {
-            return BoardManageResult(this, state)
+            is CardUpdateResult.Failure -> {
+                BoardManageResult.Failure(result.reason)
+            }
         }
-
-        val updatedBoard = updatedBoardWithNewCard(targetCard)
-        return BoardManageResult(updatedBoard, BoardManageState.SUCCESS)
     }
 
     private fun updatedBoardWithNewCard(updatedCard: Card): Board =
@@ -86,41 +82,3 @@ data class Board(
             },
         )
 }
-
-private fun validateTransition(
-    card: Card,
-    targetState: CardTaskState,
-    targetManager: CardManagerState?,
-): BoardManageState {
-    val isValidTransition = when (card.taskState) {
-        CardTaskState.TODO -> {
-            targetState == CardTaskState.TODO || targetState == CardTaskState.IN_PROGRESS
-        }
-
-        CardTaskState.IN_PROGRESS -> {
-            targetState == CardTaskState.TODO
-                    || targetState == CardTaskState.IN_PROGRESS
-                    || targetState == CardTaskState.REVIEW
-        }
-
-        CardTaskState.REVIEW -> {
-            targetState == CardTaskState.IN_PROGRESS
-                    || targetState == CardTaskState.REVIEW
-                    || targetState == CardTaskState.DONE
-        }
-
-        CardTaskState.DONE -> {
-            targetState == CardTaskState.TODO || targetState == CardTaskState.DONE
-        }
-    }
-
-    if (!isValidTransition) return BoardManageState.INVALID_TRANSITION
-
-    if (targetState != CardTaskState.TODO && targetManager == null)
-        return BoardManageState.MANAGER_REQUIRED
-
-    return BoardManageState.SUCCESS
-}
-
-private fun validateDelete(card: Card): Boolean =
-    card.taskState == CardTaskState.TODO || card.taskState == CardTaskState.IN_PROGRESS

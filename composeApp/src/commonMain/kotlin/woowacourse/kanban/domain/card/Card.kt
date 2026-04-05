@@ -1,6 +1,6 @@
 package woowacourse.kanban.domain.card
 
-import woowacourse.kanban.domain.card.Card.Companion.create
+import woowacourse.kanban.domain.common.FailureReason
 import woowacourse.kanban.domain.common.generateId
 
 /**
@@ -90,9 +90,17 @@ class Card private constructor(
             )
         }
     }
-    fun updateWithNewState(
-        newState: CardTaskState,
-    ): Card {
+
+    fun move(targetState: CardTaskState): CardMoveResult {
+        if (targetState.isManagerRequired && !hasManager()) {
+            return CardMoveResult.Failure(FailureReason.MANAGER_REQUIRED)
+        }
+
+        return taskState.move(this, targetState)
+    }
+
+    fun canDelete(): Boolean = taskState.isDeletable
+    fun updateWithNewState(newState: CardTaskState): Card {
         return Card(
             id = id,
             title = title,
