@@ -54,7 +54,6 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import woowacourse.kanban.domain.board.Board
 import woowacourse.kanban.domain.board.BoardManageResult
-import woowacourse.kanban.domain.board.BoardManageState
 import woowacourse.kanban.domain.card.Card
 import woowacourse.kanban.domain.card.CardManagerState
 import woowacourse.kanban.domain.card.CardTaskState
@@ -63,6 +62,8 @@ import woowacourse.kanban.ui.card.CardEditorDialog
 import woowacourse.kanban.ui.card.CardScreen
 import woowacourse.kanban.ui.card.editor.CardEditorMode
 import woowacourse.kanban.ui.card.editor.CardEditorState
+import woowacourse.kanban.ui.card.editor.createCard
+import woowacourse.kanban.ui.card.editor.editCard
 import woowacourse.kanban.ui.theme.BoardColor.DoneContentColor
 import woowacourse.kanban.ui.theme.BoardColor.DoneHeaderColor
 import woowacourse.kanban.ui.theme.BoardColor.InProgressContentColor
@@ -155,11 +156,12 @@ internal fun BoardScreenContents(
                     modifier = Modifier.fillMaxSize(),
                     board = board,
                     onMoveCard = { result ->
-                        if (result.status == BoardManageState.SUCCESS) {
-                            onBoardChange(result.board)
-                        } else {
-                            coroutineScope.launch {
-                                snackbarHostState.showSnackbar(result.status.message())
+                        when (result) {
+                            is BoardManageResult.Success -> { onBoardChange(result.board) }
+                            is BoardManageResult.Failure -> {
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(result.reason.message())
+                                }
                             }
                         }
                     },
@@ -176,7 +178,6 @@ internal fun BoardScreenContents(
                             ),
                         )
                         onShowCardEditorDialogChange(true)
-                        onShowCardEditorDialogChange(true)
                     },
                 )
             }
@@ -189,8 +190,8 @@ internal fun BoardScreenContents(
                     onSubmit = { editorState ->
                         when (mode) {
                             CardEditorMode.ADD -> {
-                                val updatedBoard = createCard(board, editorState)
-                                onBoardChange(updatedBoard)
+                                val newCard = cardEditorState.createCard()
+                                onBoardChange(board.addCard(newCard))
                                 onShowCardEditorDialogChange(false)
 
                                 coroutineScope.launch {
@@ -199,39 +200,42 @@ internal fun BoardScreenContents(
                             }
 
                             CardEditorMode.EDIT -> {
-                                val editingCard = selectedCard!!
-                                val result = editCard(board, editingCard, editorState)
+                                val editingCard = selectedCard ?: return@CardEditorDialog
+                                val editedCard = editorState.editCard(editingCard.id)
+                                when (val result = board.updateCard(editedCard)) {
+                                    is BoardManageResult.Success -> {
+                                        onBoardChange(result.board)
+                                        onShowCardEditorDialogChange(false)
 
-                                if (result.status == BoardManageState.SUCCESS) {
-                                    onBoardChange(result.board)
-                                    onShowCardEditorDialogChange(false)
-
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar("태스크가 수정되었습니다.")
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar("태스크가 수정되었습니다.")
+                                        }
                                     }
-                                } else {
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar(result.status.message())
+
+                                    is BoardManageResult.Failure -> {
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar(result.reason.message())
+                                        }
                                     }
                                 }
                             }
                         }
                     },
                     onDelete = {
-                        val editingCard = selectedCard!!
+                        val editingCard = selectedCard ?: return@CardEditorDialog
+                        when(val result = board.deleteCard(editingCard.id)){
+                            is BoardManageResult.Success -> {
+                                onBoardChange(result.board)
+                                onShowCardEditorDialogChange(false)
 
-                        val result = board.deleteCard(editingCard.id)
-
-                        if (result.status == BoardManageState.SUCCESS) {
-                            onBoardChange(result.board)
-                            onShowCardEditorDialogChange(false)
-
-                            coroutineScope.launch {
-                                snackbarHostState.showSnackbar("태스크가 삭제되었습니다.")
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar("태스크가 삭제되었습니다.")
+                                }
                             }
-                        } else {
-                            coroutineScope.launch {
-                                snackbarHostState.showSnackbar("해당 상태에서는 태스크 삭제가 불가합니다.")
+                            is BoardManageResult.Failure -> {
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(result.reason.message())
+                                }
                             }
                         }
                     },
@@ -511,33 +515,6 @@ private fun BoardCardColumn(
             }
         }
     }
-}
-
-private fun createCard(board: Board, editorState: CardEditorState): Board {
-    val newCard = Card.create(
-        title = editorState.title,
-        content = editorState.content,
-        tags = editorState.tags,
-        manager = editorState.managerState,
-        state = editorState.taskState,
-    )
-    return board.addCard(newCard)
-}
-
-private fun editCard(
-    board: Board,
-    originalCard: Card,
-    editorState: CardEditorState,
-): BoardManageResult {
-    val updatedCard = Card.update(
-        id = originalCard.id,
-        title = editorState.title,
-        content = editorState.content,
-        tags = editorState.tags,
-        manager = editorState.managerState,
-        state = editorState.taskState,
-    )
-    return board.updateCard(updatedCard)
 }
 
 /* Preview */

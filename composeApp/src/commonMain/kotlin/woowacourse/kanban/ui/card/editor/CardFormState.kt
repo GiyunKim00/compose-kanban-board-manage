@@ -1,5 +1,6 @@
 package woowacourse.kanban.ui.card.editor
 
+import woowacourse.kanban.domain.card.Card
 import woowacourse.kanban.domain.card.CardManagerState
 import woowacourse.kanban.domain.card.CardTaskState
 import woowacourse.kanban.domain.card.CardValidator
@@ -26,3 +27,22 @@ data class CardEditorState(
             tagValidationResult.isValid &&
             isManagerValid
 }
+
+fun CardEditorState.createCard(): Card =
+    Card.create(
+        title = title,
+        content = content,
+        tags = tags,
+        manager = managerState,
+        state = taskState,
+    )
+
+fun CardEditorState.editCard(id: String): Card =
+    Card.update(
+        id = id,
+        title = title,
+        content = content,
+        tags = tags,
+        manager = managerState,
+        state = taskState,
+    )
