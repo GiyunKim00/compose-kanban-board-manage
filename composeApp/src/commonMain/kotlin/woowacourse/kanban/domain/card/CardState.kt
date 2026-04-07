@@ -5,10 +5,12 @@ import woowacourse.kanban.domain.common.FailureReason
 enum class CardTaskState(
     val isDeletable: Boolean = false,
     val isManagerRequired: Boolean = true,
+    val showNoManagerOption: Boolean = false,
 ) {
     TODO(
         isDeletable = true,
         isManagerRequired = false,
+        showNoManagerOption = true,
     ) {
         override fun move(card: Card, targetState: CardTaskState): CardMoveResult {
             return when (targetState) {

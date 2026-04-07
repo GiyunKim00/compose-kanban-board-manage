@@ -19,30 +19,10 @@ data class CardEditorState(
     val tagValidationResult: TagValidationResult = CardValidator.validateTags(tagInput)
 
     val tags: List<String> = CardValidator.parseTags(tagInput)
-    val isManagerRequired: Boolean = taskState != CardTaskState.TODO
 
-    val isManagerValid: Boolean = !isManagerRequired || managerState != null
+    val isManagerValid: Boolean = !taskState.isManagerRequired || managerState != null
 
     val isSubmitEnabled: Boolean = titleValidationResult.isValid &&
             tagValidationResult.isValid &&
             isManagerValid
 }
-
-fun CardEditorState.createCard(): Card =
-    Card.create(
-        title = title,
-        content = content,
-        tags = tags,
-        manager = managerState,
-        state = taskState,
-    )
-
-fun CardEditorState.editCard(id: String): Card =
-    Card.update(
-        id = id,
-        title = title,
-        content = content,
-        tags = tags,
-        manager = managerState,
-        state = taskState,
-    )

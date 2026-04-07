@@ -58,12 +58,11 @@ import woowacourse.kanban.domain.card.Card
 import woowacourse.kanban.domain.card.CardManagerState
 import woowacourse.kanban.domain.card.CardTaskState
 import woowacourse.kanban.ui.board.common.toDisplayText
+import woowacourse.kanban.ui.card.CardEditorActionButtons
 import woowacourse.kanban.ui.card.CardEditorDialog
 import woowacourse.kanban.ui.card.CardScreen
 import woowacourse.kanban.ui.card.editor.CardEditorMode
 import woowacourse.kanban.ui.card.editor.CardEditorState
-import woowacourse.kanban.ui.card.editor.createCard
-import woowacourse.kanban.ui.card.editor.editCard
 import woowacourse.kanban.ui.theme.BoardColor.DoneContentColor
 import woowacourse.kanban.ui.theme.BoardColor.DoneHeaderColor
 import woowacourse.kanban.ui.theme.BoardColor.InProgressContentColor
@@ -157,7 +156,10 @@ internal fun BoardScreenContents(
                     board = board,
                     onMoveCard = { result ->
                         when (result) {
-                            is BoardManageResult.Success -> { onBoardChange(result.board) }
+                            is BoardManageResult.Success -> {
+                                onBoardChange(result.board)
+                            }
+
                             is BoardManageResult.Failure -> {
                                 coroutineScope.launch {
                                     snackbarHostState.showSnackbar(result.reason.message())
@@ -183,66 +185,101 @@ internal fun BoardScreenContents(
             }
 
             if (showCardEditorDialog) {
-                CardEditorDialog(
-                    mode = mode,
-                    cardEditorState = cardEditorState,
-                    onCardEditorStateChange = { onCardEditorStateChange(it) },
-                    onSubmit = { editorState ->
-                        when (mode) {
-                            CardEditorMode.ADD -> {
-                                val newCard = cardEditorState.createCard()
-                                onBoardChange(board.addCard(newCard))
-                                onShowCardEditorDialogChange(false)
-
-                                coroutineScope.launch {
-                                    snackbarHostState.showSnackbar("새로운 태스크가 추가되었습니다.")
-                                }
-                            }
-
-                            CardEditorMode.EDIT -> {
-                                val editingCard = selectedCard ?: return@CardEditorDialog
-                                val editedCard = editorState.editCard(editingCard.id)
-                                when (val result = board.updateCard(editedCard)) {
-                                    is BoardManageResult.Success -> {
-                                        onBoardChange(result.board)
+                when (mode) {
+                    CardEditorMode.ADD -> {
+                        CardEditorDialog(
+                            title = "새 태스크 생성",
+                            cardEditorState = cardEditorState,
+                            onCardEditorStateChange = onCardEditorStateChange,
+                            onDismiss = { onShowCardEditorDialogChange(false) },
+                            buttonSection = {
+                                CardEditorActionButtons(
+                                    submitText = "생성",
+                                    submitEnabled = cardEditorState.isSubmitEnabled,
+                                    onCancelClick = { onShowCardEditorDialogChange(false) },
+                                    onSubmitClick = {
+                                        val newCard = Card.create(
+                                            title = cardEditorState.title,
+                                            content = cardEditorState.content,
+                                            tags = cardEditorState.tags,
+                                            manager = cardEditorState.managerState,
+                                            state = cardEditorState.taskState,
+                                        )
+                                        onBoardChange(board.addCard(newCard))
                                         onShowCardEditorDialogChange(false)
 
                                         coroutineScope.launch {
-                                            snackbarHostState.showSnackbar("태스크가 수정되었습니다.")
+                                            snackbarHostState.showSnackbar("새로운 태스크가 추가되었습니다.")
                                         }
-                                    }
+                                    },
+                                )
+                            },
+                        )
+                    }
 
-                                    is BoardManageResult.Failure -> {
-                                        coroutineScope.launch {
-                                            snackbarHostState.showSnackbar(result.reason.message())
+                    CardEditorMode.EDIT -> {
+                        val editingCard = selectedCard ?: return@Box
+
+                        CardEditorDialog(
+                            title = "태스크 수정",
+                            cardEditorState = cardEditorState,
+                            onCardEditorStateChange = onCardEditorStateChange,
+                            onDismiss = { onShowCardEditorDialogChange(false) },
+                            buttonSection = {
+                                CardEditorActionButtons(
+                                    submitText = "수정",
+                                    submitEnabled = cardEditorState.isSubmitEnabled,
+                                    onCancelClick = { onShowCardEditorDialogChange(false) },
+                                    onDeleteClick = {
+                                        when (val result = board.deleteCard(editingCard.id)) {
+                                            is BoardManageResult.Success -> {
+                                                onBoardChange(result.board)
+                                                onShowCardEditorDialogChange(false)
+
+                                                coroutineScope.launch {
+                                                    snackbarHostState.showSnackbar("태스크가 삭제되었습니다.")
+                                                }
+                                            }
+
+                                            is BoardManageResult.Failure -> {
+                                                coroutineScope.launch {
+                                                    snackbarHostState.showSnackbar(result.reason.message())
+                                                }
+                                            }
                                         }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    onDelete = {
-                        val editingCard = selectedCard ?: return@CardEditorDialog
-                        when(val result = board.deleteCard(editingCard.id)){
-                            is BoardManageResult.Success -> {
-                                onBoardChange(result.board)
-                                onShowCardEditorDialogChange(false)
+                                    },
+                                    onSubmitClick = {
+                                        val editedCard = Card.update(
+                                            id = editingCard.id,
+                                            title = cardEditorState.title,
+                                            content = cardEditorState.content,
+                                            tags = cardEditorState.tags,
+                                            manager = cardEditorState.managerState,
+                                            state = cardEditorState.taskState,
+                                        )
 
-                                coroutineScope.launch {
-                                    snackbarHostState.showSnackbar("태스크가 삭제되었습니다.")
-                                }
-                            }
-                            is BoardManageResult.Failure -> {
-                                coroutineScope.launch {
-                                    snackbarHostState.showSnackbar(result.reason.message())
-                                }
-                            }
-                        }
-                    },
-                    onDismiss = {
-                        onShowCardEditorDialogChange(false)
-                    },
-                )
+                                        when (val result = board.updateCard(editedCard)) {
+                                            is BoardManageResult.Success -> {
+                                                onBoardChange(result.board)
+                                                onShowCardEditorDialogChange(false)
+
+                                                coroutineScope.launch {
+                                                    snackbarHostState.showSnackbar("태스크가 수정되었습니다.")
+                                                }
+                                            }
+
+                                            is BoardManageResult.Failure -> {
+                                                coroutineScope.launch {
+                                                    snackbarHostState.showSnackbar(result.reason.message())
+                                                }
+                                            }
+                                        }
+                                    },
+                                )
+                            },
+                        )
+                    }
+                }
             }
         }
     }

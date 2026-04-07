@@ -40,9 +40,7 @@ import woowacourse.kanban.ui.board.common.toDisplayText
 import woowacourse.kanban.ui.card.editor.CardEditorButton
 import woowacourse.kanban.ui.card.editor.CardEditorButtonDefaultSetting
 import woowacourse.kanban.ui.card.editor.CardEditorFormSection
-import woowacourse.kanban.ui.card.editor.CardEditorMode
 import woowacourse.kanban.ui.card.editor.CardEditorState
-import woowacourse.kanban.ui.card.editor.displayInfo
 import woowacourse.kanban.ui.card.editor.message
 import woowacourse.kanban.ui.theme.KanbanCardColor.DefaultBackground
 import woowacourse.kanban.ui.theme.KanbanCardColor.DefaultContent
@@ -52,40 +50,36 @@ import woowacourse.kanban.ui.theme.Typography.CardCreationTitle
 
 @Composable
 fun CardEditorDialog(
-    mode: CardEditorMode,
+    title: String,
     cardEditorState: CardEditorState,
     onCardEditorStateChange: (CardEditorState) -> Unit,
-    modifier: Modifier = Modifier,
-    onSubmit: (CardEditorState) -> Unit,
-    onDelete: (() -> Unit)? = null,
     onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    buttonSection: @Composable () -> Unit,
 ) {
     Dialog(
         onDismissRequest = onDismiss,
     ) {
         CardEditorDialogContents(
-            mode = mode,
+            title = title,
             modifier = modifier,
             cardEditorState = cardEditorState,
             onCardEditorStateChange = onCardEditorStateChange,
-            onSubmit = onSubmit,
-            onDelete = onDelete,
             onDismiss = onDismiss,
+            buttonSection = buttonSection,
         )
     }
 }
 
 @Composable
 internal fun CardEditorDialogContents(
-    mode: CardEditorMode,
-    modifier: Modifier = Modifier,
+    title: String,
     cardEditorState: CardEditorState,
     onCardEditorStateChange: (CardEditorState) -> Unit,
-    onSubmit: (CardEditorState) -> Unit,
-    onDelete: (() -> Unit)?,
     onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    buttonSection: @Composable () -> Unit,
 ) {
-    val display = mode.displayInfo()
     val titleValidationResult = cardEditorState.titleValidationResult
     val tagValidationResult = cardEditorState.tagValidationResult
 
@@ -96,7 +90,7 @@ internal fun CardEditorDialogContents(
             modifier = Modifier.background(DefaultBackground),
         ) {
             CardHeaderSection(
-                title = display.title,
+                title = title,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 28.dp, horizontal = 24.dp),
@@ -162,15 +156,7 @@ internal fun CardEditorDialogContents(
 
                 HorizontalDivider(modifier = Modifier.fillMaxWidth())
 
-                CardEditorButtonSection(
-                    submitText = display.submitText,
-                    showSubmitButton = display.showSubmitButton,
-                    showDeleteButton = display.showDeleteButton,
-                    submitEnabled = cardEditorState.isSubmitEnabled,
-                    onCancelClick = onDismiss,
-                    onSubmitClick = { onSubmit(cardEditorState) },
-                    onDeleteClick = onDelete,
-                )
+                buttonSection()
             }
         }
     }
@@ -272,14 +258,14 @@ private fun CardManagerSection(
 ) {
     Column {
         Text(
-            text = if (selectedState != CardTaskState.TODO) "담당자 *" else "담당자",
+            text = if (selectedState.isManagerRequired) "담당자 *" else "담당자",
             style = CardCreationTitle,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            if (selectedState == CardTaskState.TODO) {
+            if (selectedState.showNoManagerOption) {
                 ManagerButton(
                     text = "없음",
                     iconEnable = false,
@@ -353,14 +339,12 @@ private fun ManagerButton(
 }
 
 @Composable
-private fun CardEditorButtonSection(
+fun CardEditorActionButtons(
     submitText: String,
-    showSubmitButton: Boolean,
-    showDeleteButton: Boolean,
     submitEnabled: Boolean,
     modifier: Modifier = Modifier,
     onCancelClick: () -> Unit,
-    onSubmitClick: () -> Unit,
+    onSubmitClick: (() -> Unit)? = null,
     onDeleteClick: (() -> Unit)? = null,
 ) {
     Row(
@@ -377,7 +361,7 @@ private fun CardEditorButtonSection(
             onClick = onCancelClick,
         )
 
-        if (showDeleteButton) {
+        if (onDeleteClick != null) {
             Spacer(modifier = Modifier.width(12.dp))
             CardEditorButton(
                 text = "삭제",
@@ -385,11 +369,11 @@ private fun CardEditorButtonSection(
                 containerColor = CardEditorButtonDefaultSetting.DeleteContainerColor,
                 elevation = CardEditorButtonDefaultSetting.DeleteElevation,
                 enabled = true,
-                onClick = { onDeleteClick?.invoke() },
+                onClick = onDeleteClick,
             )
         }
 
-        if (showSubmitButton) {
+        if (onSubmitClick != null) {
             Spacer(modifier = Modifier.width(12.dp))
             CardEditorButton(
                 text = submitText,
@@ -407,10 +391,17 @@ private fun CardEditorButtonSection(
 @Composable
 fun CardEditorDialogPreview() {
     CardEditorDialog(
-        mode = CardEditorMode.ADD,
+        title = "새 태스크 생성",
         cardEditorState = CardEditorState(),
         onCardEditorStateChange = {},
-        onSubmit = {},
         onDismiss = {},
+        buttonSection = {
+            CardEditorActionButtons(
+                submitText = "생성",
+                submitEnabled = false,
+                onCancelClick = {},
+                onSubmitClick = {},
+            )
+        },
     )
 }
