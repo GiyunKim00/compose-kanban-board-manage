@@ -181,7 +181,9 @@ class BoardTest {
                 assertThat(movedCard.tags).containsExactlyElementsOf(oldCard.tags)
                 assertThat(movedCard.managerState).isEqualTo(oldCard.managerState)
             }
-            is BoardManageResult.Failure -> {}
+            is BoardManageResult.Failure -> {
+                error("성공해야 하는 테스트임에도 실패 : ${movedBoard.reason}")
+            }
         }
     }
 
@@ -207,7 +209,9 @@ class BoardTest {
             is BoardManageResult.Success -> {
                 assertThat(movedBoard.board.completionPercentage).isEqualTo(100)
             }
-            is BoardManageResult.Failure -> {}
+            is BoardManageResult.Failure -> {
+                error("성공해야 하는 테스트임에도 실패 : ${movedBoard.reason}")
+            }
         }
     }
 
@@ -222,7 +226,9 @@ class BoardTest {
         )
         val board = Board(cards = listOf(card))
         when(val result = board.deleteCard(card.id)) {
-            is BoardManageResult.Success -> {}
+            is BoardManageResult.Success -> {
+                assertThat(result.board.cards).doesNotContain(card)
+            }
             is BoardManageResult.Failure -> {
                 assertThat(result.reason).isEqualTo(FailureReason.INVALID_DELETE)
             }
@@ -245,7 +251,9 @@ class BoardTest {
                 assertThat(result.board.totalTaskCount).isEqualTo(0)
                 assertThat(result.board.inProgressTaskCount).isEqualTo(0)
             }
-            is BoardManageResult.Failure -> {}
+            is BoardManageResult.Failure -> {
+                error("성공해야 하는 테스트임에도 실패 : ${result.reason}")
+            }
         }
     }
 
@@ -261,7 +269,9 @@ class BoardTest {
         val board = Board(cards = listOf(card))
 
         when(val result = board.deleteCard(card.id)) {
-            is BoardManageResult.Success -> {}
+            is BoardManageResult.Success -> {
+                error("실패해야 하는 테스트임에도 성공했습니다.")
+            }
             is BoardManageResult.Failure -> {
                 assertThat(result.reason).isEqualTo(FailureReason.INVALID_DELETE)
             }
@@ -282,7 +292,9 @@ class BoardTest {
         val board = Board(cards = listOf(card))
 
         when(val result = board.deleteCard(card.id)) {
-            is BoardManageResult.Success -> {}
+            is BoardManageResult.Success -> {
+                error("실패해야 하는 테스트임에도 성공했습니다.")
+            }
             is BoardManageResult.Failure -> {
                 assertThat(result.reason).isEqualTo(FailureReason.INVALID_DELETE)
             }
@@ -301,7 +313,9 @@ class BoardTest {
         val board = Board(cards = listOf(card))
 
         when(val result = board.moveCard(card.id, CardTaskState.IN_PROGRESS)) {
-            is BoardManageResult.Success -> {}
+            is BoardManageResult.Success -> {
+                error("실패해야 하는 테스트임에도 성공했습니다.")
+            }
             is BoardManageResult.Failure -> {
                 assertThat(result.reason).isEqualTo(FailureReason.MANAGER_REQUIRED)
             }
@@ -325,7 +339,9 @@ class BoardTest {
                 assertThat(result.board.inProgressTaskCount).isEqualTo(1)
                 assertThat(result.board.cards.first().taskState).isEqualTo(CardTaskState.IN_PROGRESS)
             }
-            is BoardManageResult.Failure -> {}
+            is BoardManageResult.Failure -> {
+                error("성공해야 하는 테스트임에도 실패 : ${result.reason}")
+            }
         }
     }
 
@@ -341,7 +357,9 @@ class BoardTest {
         val board = Board(cards = listOf(card))
 
         when(val result = board.moveCard(card.id, CardTaskState.REVIEW)){
-            is BoardManageResult.Success -> {}
+            is BoardManageResult.Success -> {
+                error("실패해야 하는 테스트임에도 성공했습니다.")
+            }
             is BoardManageResult.Failure -> {
                 assertThat(result.reason).isEqualTo(FailureReason.INVALID_TRANSITION)
             }
@@ -360,7 +378,9 @@ class BoardTest {
         val board = Board(cards = listOf(card))
 
         when(val result = board.moveCard(card.id, CardTaskState.DONE)) {
-            is BoardManageResult.Success -> {}
+            is BoardManageResult.Success -> {
+                error("실패해야 하는 테스트임에도 성공했습니다.")
+            }
             is BoardManageResult.Failure -> {
                 assertThat(result.reason).isEqualTo(FailureReason.INVALID_TRANSITION)
             }
@@ -383,7 +403,9 @@ class BoardTest {
                 assertThat(result.board.inProgressTaskCount).isEqualTo(0)
                 assertThat(result.board.reviewTaskCount).isEqualTo(1)
             }
-            is BoardManageResult.Failure -> {}
+            is BoardManageResult.Failure -> {
+                error("성공해야 하는 테스트임에도 실패 : ${result.reason}")
+            }
         }
     }
 
@@ -399,7 +421,9 @@ class BoardTest {
         val board = Board(cards = listOf(card))
 
         when(val result = board.moveCard(card.id, CardTaskState.DONE)){
-            is BoardManageResult.Success -> {}
+            is BoardManageResult.Success -> {
+                error("실패해야 하는 테스트임에도 성공했습니다.")
+            }
             is BoardManageResult.Failure -> {
                 assertThat(result.reason).isEqualTo(FailureReason.INVALID_TRANSITION)
             }
@@ -422,7 +446,9 @@ class BoardTest {
                 assertThat(result.board.reviewTaskCount).isEqualTo(0)
                 assertThat(result.board.doneTaskCount).isEqualTo(1)
             }
-            is BoardManageResult.Failure -> {}
+            is BoardManageResult.Failure -> {
+                error("성공해야 하는 테스트임에도 실패 : ${result.reason}")
+            }
         }
     }
 
@@ -438,7 +464,9 @@ class BoardTest {
         val board = Board(cards = listOf(card))
 
         when(val result = board.moveCard(card.id, CardTaskState.TODO)){
-            is BoardManageResult.Success -> {}
+            is BoardManageResult.Success -> {
+                error("실패해야 하는 테스트임에도 성공했습니다.")
+            }
             is BoardManageResult.Failure -> {
                 assertThat(result.reason).isEqualTo(FailureReason.INVALID_TRANSITION)
             }
@@ -461,7 +489,9 @@ class BoardTest {
                 assertThat(result.board.doneTaskCount).isEqualTo(0)
                 assertThat(result.board.toDoTaskCount).isEqualTo(1)
             }
-            is BoardManageResult.Failure -> {}
+            is BoardManageResult.Failure -> {
+                error("성공해야 하는 테스트임에도 실패 : ${result.reason}")
+            }
         }
     }
 
@@ -477,7 +507,9 @@ class BoardTest {
         val board = Board(cards = listOf(card))
 
         when(val result = board.moveCard(card.id, CardTaskState.IN_PROGRESS)){
-            is BoardManageResult.Success -> {}
+            is BoardManageResult.Success -> {
+                error("실패해야 하는 테스트임에도 성공했습니다.")
+            }
             is BoardManageResult.Failure -> {
                 assertThat(result.reason).isEqualTo(FailureReason.INVALID_TRANSITION)
             }
@@ -496,7 +528,9 @@ class BoardTest {
         val board = Board(cards = listOf(card))
 
         when(val result = board.moveCard(card.id, CardTaskState.REVIEW)){
-            is BoardManageResult.Success -> {}
+            is BoardManageResult.Success -> {
+                error("실패해야 하는 테스트임에도 성공했습니다.")
+            }
             is BoardManageResult.Failure -> {
                 assertThat(result.reason).isEqualTo(FailureReason.INVALID_TRANSITION)
             }
@@ -528,7 +562,9 @@ class BoardTest {
                 assertThat(result.board.inProgressTaskCount).isEqualTo(0)
                 assertThat(result.board.reviewTaskCount).isEqualTo(1)
             }
-            is BoardManageResult.Failure -> {}
+            is BoardManageResult.Failure -> {
+                error("성공해야 하는 테스트임에도 실패 : ${result.reason}")
+            }
         }
     }
 
@@ -556,7 +592,9 @@ class BoardTest {
                 assertThat(result.board.toDoTaskCount).isEqualTo(0)
                 assertThat(result.board.doneTaskCount).isEqualTo(1)
             }
-            is BoardManageResult.Failure -> {}
+            is BoardManageResult.Failure -> {
+                error("성공해야 하는 테스트임에도 실패 : ${result.reason}")
+            }
         }
     }
 }
