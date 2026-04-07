@@ -204,16 +204,17 @@ class BoardScreenTest {
             var cardEditorState by remember { mutableStateOf(CardEditorState()) }
             var snackbarHostState by remember {mutableStateOf(SnackbarHostState())}
             var mode by remember { mutableStateOf(CardEditorMode.ADD) }
+            var selectedCard by remember { mutableStateOf<Card?>(null) }
 
             BoardScreenContents(
                 board = board,
                 showCardEditorDialog = showCardEditorDialog,
                 mode = mode,
-                selectedCard = null,
+                selectedCard = selectedCard,
                 cardEditorState = cardEditorState,
                 onShowCardEditorDialogChange = { showCardEditorDialog = it },
                 onModeChange = { mode = it },
-                onSelectedCardChange = {},
+                onSelectedCardChange = {selectedCard = it},
                 onCardEditorStateChange = { cardEditorState = it },
                 onBoardChange = {
                     board = it
@@ -226,7 +227,7 @@ class BoardScreenTest {
         onNodeWithText("수정할 카드").performClick()
 
         onNodeWithTag("모달 열림").assertExists()
-        onNodeWithText("기존 태스크 수정").assertExists()
+        onNodeWithText("태스크 수정").assertExists()
         onNodeWithText("삭제").assertExists()
         onNodeWithText("수정").assertExists()
     }

@@ -11,7 +11,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.runComposeUiTest
-import woowacourse.kanban.ui.card.editor.CardEditorMode
 import woowacourse.kanban.ui.card.editor.CardEditorState
 import kotlin.test.Test
 
@@ -22,12 +21,18 @@ class CardEditorDialogTest {
         //when
         setContent {
             CardEditorDialog(
-                mode = CardEditorMode.ADD,
+                title = "새 태스크 생성",
                 cardEditorState = CardEditorState(),
                 onCardEditorStateChange = {},
-                onSubmit = {},
-                onDelete = {},
                 onDismiss = {},
+                buttonSection = {
+                    CardEditorActionButtons(
+                        submitText = "생성",
+                        submitEnabled = false,
+                        onCancelClick = {},
+                        onSubmitClick = {},
+                    )
+                },
             )
         }
 
@@ -47,12 +52,18 @@ class CardEditorDialogTest {
         //when
         setContent {
             CardEditorDialog(
-                mode = CardEditorMode.ADD,
+                title = "새 태스크 생성",
                 cardEditorState = CardEditorState(),
                 onCardEditorStateChange = {},
-                onSubmit = {},
-                onDelete = {},
                 onDismiss = {},
+                buttonSection = {
+                    CardEditorActionButtons(
+                        submitText = "생성",
+                        submitEnabled = false,
+                        onCancelClick = {},
+                        onSubmitClick = {},
+                    )
+                },
             )
         }
         onNodeWithTag("titleTextField").performTextInput(" ")
@@ -67,12 +78,18 @@ class CardEditorDialogTest {
         //when
         setContent {
             CardEditorDialog(
-                mode = CardEditorMode.ADD,
+                title = "새 태스크 생성",
                 cardEditorState = CardEditorState(),
                 onCardEditorStateChange = {},
-                onSubmit = {},
-                onDelete = {},
                 onDismiss = {},
+                buttonSection = {
+                    CardEditorActionButtons(
+                        submitText = "생성",
+                        submitEnabled = false,
+                        onCancelClick = {},
+                        onSubmitClick = {},
+                    )
+                },
             )
         }
         onNodeWithTag("titleTextField").performTextInput("\t")
@@ -85,13 +102,20 @@ class CardEditorDialogTest {
         //when
         setContent {
             var cardEditorState by remember { mutableStateOf(CardEditorState()) }
+
             CardEditorDialog(
-                mode = CardEditorMode.ADD,
+                title = "새 태스크 생성",
                 cardEditorState = cardEditorState,
-                onCardEditorStateChange = { cardEditorState = it },
-                onSubmit = {},
-                onDelete = {},
+                onCardEditorStateChange = {cardEditorState = it},
                 onDismiss = {},
+                buttonSection = {
+                    CardEditorActionButtons(
+                        submitText = "생성",
+                        submitEnabled = false,
+                        onCancelClick = {},
+                        onSubmitClick = {},
+                    )
+                },
             )
         }
 
@@ -105,13 +129,21 @@ class CardEditorDialogTest {
     fun `올바른 태그를 입력하면 안내 문구가 유지된다`() = runComposeUiTest {
         //when
         setContent {
+            var cardEditorState by remember { mutableStateOf(CardEditorState()) }
+
             CardEditorDialog(
-                mode = CardEditorMode.ADD,
-                cardEditorState = CardEditorState(),
-                onCardEditorStateChange = {},
-                onSubmit = {},
-                onDelete = {},
+                title = "새 태스크 생성",
+                cardEditorState = cardEditorState,
+                onCardEditorStateChange = { cardEditorState = it },
                 onDismiss = {},
+                buttonSection = {
+                    CardEditorActionButtons(
+                        submitText = "생성",
+                        submitEnabled = false,
+                        onCancelClick = {},
+                        onSubmitClick = {},
+                    )
+                },
             )
         }
 
@@ -128,12 +160,18 @@ class CardEditorDialogTest {
             var cardEditorState by remember { mutableStateOf(CardEditorState()) }
 
             CardEditorDialog(
-                mode = CardEditorMode.ADD,
+                title = "새 태스크 생성",
                 cardEditorState = cardEditorState,
                 onCardEditorStateChange = { cardEditorState = it },
-                onSubmit = {},
-                onDelete = {},
                 onDismiss = {},
+                buttonSection = {
+                    CardEditorActionButtons(
+                        submitText = "생성",
+                        submitEnabled = false,
+                        onCancelClick = {},
+                        onSubmitClick = {},
+                    )
+                },
             )
         }
 
