@@ -19,7 +19,7 @@
 
 ### 1차
 - [x] BoardTest 내 when 문 분기 중 빈 람다에 따른 거짓 양성 가능성 제거
-- [ ] Board update 메서드의 책임위임 일관성 이슈 관련 수정
+- [x] Board update 메서드의 책임위임 일관성 이슈 관련 수정
 - [ ] BoardScreen 내 행위 주체에 따른 책임 이전 및 확장함수 제거
 - [ ] 상태 판단 책임을 UI > CardTaskState 이전 및 UI 상 상태 비교 로직 제거
 - [ ] slot API 활용, 기존 if/when UI 분기 로직 수정

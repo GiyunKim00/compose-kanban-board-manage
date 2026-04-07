@@ -99,6 +99,10 @@ class Card private constructor(
         return taskState.move(this, targetState)
     }
 
+    fun validateUpdate(targetCard: Card): CardUpdateResult {
+        return taskState.update(this, targetCard)
+    }
+
     fun canDelete(): Boolean = taskState.isDeletable
     fun updateWithNewState(newState: CardTaskState): Card {
         return Card(

@@ -63,7 +63,7 @@ data class Board(
     fun updateCard(targetCard: Card): BoardManageResult {
         val originalCard = cards.first { it.id == targetCard.id }
 
-        return when (val result = originalCard.taskState.update(originalCard, targetCard)) {
+        return when (val result = originalCard.validateUpdate(targetCard)) {
             is CardUpdateResult.Success -> {
                 val updatedBoard = updatedBoardWithNewCard(result.card)
                 BoardManageResult.Success(updatedBoard)
